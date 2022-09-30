@@ -7,7 +7,7 @@ app.listen(port, () => {
   console.log(`App running on port ${port}...`);
 });
 
-// USE "NPM START" in terminal to run the server. We changed the script in package.json from test to start with value "nodemon server.js"
+// USE "npm run start:dev or npm run start:prod" in terminal to run the server. We changed the script in package.json from test to start with value "nodemon server.js"
 
 // 1. install following dependencies in next project like:
 // npm i eslint prettier eslint-config-prettier eslint-plugin-prettier eslint-config-airbnb eslint-plugin-node eslint-plugin-import eslint-plugin-jsx-a11y eslint-plugin-react --save-dev
