@@ -8,8 +8,12 @@ const __dirname = path.resolve()
 
 const app = express()
 
-// 1. MIDDLEWARE (express build in middleware)
-app.use(morgan("dev")) // third party middleware "morgan". http request logger. see more on express website/ressources/middleware
+// 1. MIDDLEWARE (express build in middleware) We just want to use morgan middleware when we are in development, not in production.
+console.log(process.env.NODE_ENV);
+if (process.env.NODE_ENV === "development") {
+    app.use(morgan("dev")) 
+}
+
 app.use(express.json())
 app.use(express.static(`${__dirname}/public`)) // when we type now in our browser 127.0.0.1:3000/overview.html we can see our html file dislayed in te browser. We can do that with all our static files 
 // Creating our own middleware function!:
