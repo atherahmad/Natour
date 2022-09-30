@@ -1,7 +1,6 @@
-// import dotenv from "dotenv"
 // import "dotenv/config"
-import dotenv from "dotenv"
-dotenv.config({ path: "./config.env" })
+// import dotenv from "dotenv"
+// dotenv.config({ path: "./config.env" })
 
 import app from "./app.js"
 

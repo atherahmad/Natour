@@ -3,7 +3,9 @@ import morgan from "morgan"
 import tourRouter from "./routes/tourRoutes.js"
 import userRouter from "./routes/userRoutes.js"
 import path from "path"
+import dotenv from "dotenv"
 
+dotenv.config({ path: "./config.env" })
 const __dirname = path.resolve()
 
 const app = express()
