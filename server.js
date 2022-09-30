@@ -1,14 +1,6 @@
-// import "dotenv/config"
-// import dotenv from "dotenv"
-// dotenv.config({ path: "./config.env" })
-
 import app from "./app.js"
+import express from "express"
 
-
-
-
-
-console.log(process.env);
 
 const port = process.env.PORT || 3000
 

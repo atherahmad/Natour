@@ -6,12 +6,12 @@ import path from "path"
 import dotenv from "dotenv"
 
 dotenv.config({ path: "./config.env" })
+
 const __dirname = path.resolve()
 
 const app = express()
 
 // 1. MIDDLEWARE (express build in middleware) We just want to use morgan middleware when we are in development, not in production.
-console.log(process.env.NODE_ENV);
 if (process.env.NODE_ENV === "development") {
     app.use(morgan("dev")) 
 }
