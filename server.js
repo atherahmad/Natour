@@ -1,11 +1,77 @@
 /* eslint-disable import/extensions */
+import mongoose from "mongoose"
 import app from './app.js';
 
 const port = process.env.PORT || 3000;
 
-app.listen(port, () => {
-  console.log(`App running on port ${port}...`);
+// placing "<PASSWORD>" in the connection string in config.env with our user Password. Which is saved in environmental variables.
+const DB = process.env.DATABASE.replace("<PASSWORD>", process.env.DATABASE_PASSWORD)
+
+// connection to hosted ATLAS database
+mongoose.connect(DB, {
+  useNewUrlParser: true,
+  useCreateIndex: true,
+  useFindAndModify: false,
+  useUnifiedTopology: true
+})
+.then(() => 
+  app.listen(port, console.log(`DB connected and listening on ${port}`)))
+.catch((err) => {
+  console.log(`${err} dit not connect...`);
+})
+
+// global error Handler:
+app.use((error, req, res, next) => {
+  res.status(error.status || 500);
+  res.json({
+    error: {
+      message: error.message,
+    },
+  });
 });
+
+// defining a Schema:
+// const tourSchema = new mongoose.Schema({
+//   name: {
+//     type: String,
+//     required: [true, "A tour must have a name"],
+//     unique: true
+//   },
+//   rating: {
+//     type: Number,
+//     default: 4.5
+//   },
+//   price: {
+//     type: Number,
+//     required: [true, "A tour must have a price"]
+//   }
+// })
+// creating a Model out of it: Model variables always wih capital Letter.
+// const Tour = mongoose.model("Tour",tourSchema)
+
+// const testTour = new Tour({
+//   name: "The Park Camper",
+//   rating: 4.7,
+//   price: 997
+// })
+// this saves the document to our hosted database Atlas, which is connected to mongosh and mongodb-compass
+// testTour.save().then(doc => {
+//   console.log(doc);
+// }).catch(err => {
+//   console.log("ERROR", err);
+// })
+
+// Connection to LOCAL database:
+// mongoose.connect(process.env.DATABASE_LOCAL, {
+//   useNewUrlParser: true,
+//   useCreateIndex: true,
+//   useFindAndModify: false
+// }).then(() => console.log("DB connection successful"))
+
+// listen to our Server
+// app.listen(port, () => {
+//   console.log(`App running on port ${port}...`);
+// });
 
 // USE "npm run start:dev or npm run start:prod" in terminal to run the server. We changed the script in package.json from test to start with value "nodemon server.js"
 
