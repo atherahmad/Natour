@@ -10,7 +10,7 @@ const __dirname = path.resolve()
 
 const DB = process.env.DATABASE.replace("<PASSWORD>", process.env.DATABASE_PASSWORD)
 
-// connection to hosted ATLAS database again.
+// connection to hosted ATLAS database again. This time not listening to our port.
 mongoose.connect(DB, {
   useNewUrlParser: true,
   useCreateIndex: true,
@@ -43,12 +43,13 @@ const deleteData = async () => {
     try {
         await Tour.deleteMany()
         console.log("Data successfully deleted");
-        process.exit()
     } catch (error) {
         console.log(error);
     }
+    process.exit()
 }
 
+// conditioning for import and delete
 if (process.argv[2] === "--import") {
     importData()
 } else if (process.argv[2] === "--delete") {
@@ -57,6 +58,7 @@ if (process.argv[2] === "--import") {
 
 console.log(process.argv);
 
-// run "node dev-data/data/import-dev-data.js" in Terminal to see the console.log(process.argv)
-// node dev-data/data/import-dev-data.js --import (for importing options into the process.argv array, on the index 2 is "--import")
-// node dev-data/data/import-dev-data.js --delete (this command deletes all the documents in the tour collection)
+// run "node dev-data/data/import-dev-data.js" to start DB. in Terminal to see the console.log(process.argv)
+// node dev-data/data/import-dev-data.js --import (for creating option String "--import" into the process.argv array, on the index 2 is "--import") --> imports the json file converted to js objects into tours collection.
+// node dev-data/data/import-dev-data.js --delete (for creating option String "--delete" into the process.argv array, on the index 2 is "--delete") --> deletes all documents inside the collection tours
+//

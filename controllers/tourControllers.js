@@ -1,18 +1,48 @@
-// import fs from 'fs';
-// import path from 'path';
 import Tour from '../models/tour.js';
 
-// const __dirname = path.resolve();
 
-// const tours = JSON.parse(
-//   fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
-// );
+// FILTERING WITH QUERIES
+// 1. WAY
+// const tours = await Tour.find({
+// duration: 5,
+// difficulty: "easy"
+// })
+
+// 2. WAY - with mongoose query methods
+// const query = Tour.find()
+// .where("duration")
+// .equals(5) // you can use here lt, gt etc.
+// .where("difficulty")
+// .equals("easy")
 
 export const getAllTours = async (req, res, next) => {
   try {
-    const tours = await Tour.find()
+    console.log(req.query);
+    // BUILD QUERY
+    // 1) Filtering
+    const queryObj = {...req.query} // destructering the fields (key/value pairs) out of the query object
+    const excludedFields = ["page","sort","limit","fields"]
+    excludedFields.forEach(item => delete queryObj[item]) // forEach loops over excludedFields array and applies delete method on all the elements in queryObj which are fitting with the elements inside excludedFIelds
+    // console.log(req.query, queryObj); // inside our req object is the query object located which saves the params
+
+    // 2) Advanced Filtering
+    // example of our query String --> 127.0.0.1:3000/api/v1/tours?duration[gte]=5&difficulty=easy&price[lt]=1500 ==> is saved in req.query = { difficulty: 'easy', duration: { gte: '5' }, price: { lt: '1500' } }
+    // { difficulty: "easy", duration: {$gte: 5}} thats how we would manually write the filter object in mongodb/mongosh
+    // { difficulty: 'easy', duration: { gte: '5' } } thats what our console.log(req.query) gives us. ==> we need to add "$" before our operators gte, lt, etc.
+    // gte, gt, lte, lt
+    let queryStr = JSON.stringify(queryObj) // we convert our JS object to a string
+    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`) // using regular expression to find one of the words (gte, gt, lte, lt). "\b" means we match the exact words. the "g" means we are replacing not just the first match. The second argument is a callback where we want to replace our match with ${match}, like you see above
+    console.log(JSON.parse(queryStr));
+   
+    const query = Tour.find(JSON.parse(queryStr))
+
+    // EXECUTE QUERY
+    const tours = await query
+
+    // SEND RESPONSE
     res.status(200).json({
       status: 'success',
+      results: tours.length, // just do this if you read an array with multiple objects inside.
       data: {
         tours
       },
@@ -20,14 +50,6 @@ export const getAllTours = async (req, res, next) => {
   } catch (error) {
     next(error)
   }
-  // res.status(200).json({
-  //   status: 'success',
-  //   requestedAt: req.requestTime,
-  //   results: tours.length, // just do this when you send an array with multiple objects inside
-  //   data: {
-  //     tours,
-  //   },
-  // });
 };
 
 export const getTour = async (req, res, next) => {
