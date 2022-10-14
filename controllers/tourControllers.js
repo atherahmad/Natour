@@ -1,43 +1,26 @@
 import Tour from '../models/tour.js';
+import APIFeatures from '../utils/apiFeatures.js';
 
-
-// FILTERING WITH QUERIES
-// 1. WAY
-// const tours = await Tour.find({
-// duration: 5,
-// difficulty: "easy"
-// })
-
-// 2. WAY - with mongoose query methods
-// const query = Tour.find()
-// .where("duration")
-// .equals(5) // you can use here lt, gt etc.
-// .where("difficulty")
-// .equals("easy")
+// ALIASING : we can manipulate the req.query object before we will use it in getAllTours
+export const aliasTopTours = (req, res, next) => {
+  req.query.limit = "5"
+  req.query.sort = "-ratingsAverage,price"
+  req.query.fields = "name,price,ratingsAverage,summary,difficulty"
+  next()
+}
 
 export const getAllTours = async (req, res, next) => {
   try {
     console.log(req.query);
-    // BUILD QUERY
-    // 1) Filtering
-    const queryObj = {...req.query} // destructering the fields (key/value pairs) out of the query object
-    const excludedFields = ["page","sort","limit","fields"]
-    excludedFields.forEach(item => delete queryObj[item]) // forEach loops over excludedFields array and applies delete method on all the elements in queryObj which are fitting with the elements inside excludedFIelds
-    // console.log(req.query, queryObj); // inside our req object is the query object located which saves the params
 
-    // 2) Advanced Filtering
-    // example of our query String --> 127.0.0.1:3000/api/v1/tours?duration[gte]=5&difficulty=easy&price[lt]=1500 ==> is saved in req.query = { difficulty: 'easy', duration: { gte: '5' }, price: { lt: '1500' } }
-    // { difficulty: "easy", duration: {$gte: 5}} thats how we would manually write the filter object in mongodb/mongosh
-    // { difficulty: 'easy', duration: { gte: '5' } } thats what our console.log(req.query) gives us. ==> we need to add "$" before our operators gte, lt, etc.
-    // gte, gt, lte, lt
-    let queryStr = JSON.stringify(queryObj) // we convert our JS object to a string
-    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`) // using regular expression to find one of the words (gte, gt, lte, lt). "\b" means we match the exact words. the "g" means we are replacing not just the first match. The second argument is a callback where we want to replace our match with ${match}, like you see above
-    console.log(JSON.parse(queryStr));
-   
-    const query = Tour.find(JSON.parse(queryStr))
+    // EXECUTE QUERY: here we can just delete one of the methods if we dont want to apply them.
+    const features = new APIFeatures(Tour.find(), req.query)
+    .filter()
+    .sort()
+    .limitFields()
+    .paginate()
 
-    // EXECUTE QUERY
-    const tours = await query
+    const tours = await features.query
 
     // SEND RESPONSE
     res.status(200).json({
@@ -89,28 +72,6 @@ export const createTour = async (req, res, next) => {
     // })
     next(error)
   }
-  // console.log(req.body);
-  // const newId = tours[tours.length - 1].id + 1; // this is calculating an id for the new tour we want to create. (first we had 9 tours, now we have 10 for example)
-  // eslint-disable-next-line node/no-unsupported-features/es-syntax
-  // const newTour = { id: newId, ...req.body }; // Object.assign is merging 2 objects together. Our req.body from the client site and we add the newId to it.
-
-  // tours.push(newTour); // We add now our new created newTour object into our tours variable, which is an array of objects. (already hold 9 tours, now 10)
-
-  // now we are adding the tour into our tours-simple.json file. We need to convert our js object into a JSON.string first.
-  // fs.writeFile(
-  //   `${__dirname}/dev-data/data/tours-simple.json`,
-  //   JSON.stringify(tours),
-  //   // eslint-disable-next-line no-unused-vars
-  //   (err) => {
-  //     res.status(201).json({
-  //       // status 201 means new created data (new tour added)
-  //       status: 'success',
-  //       data: {
-  //         tour: newTour,
-  //       },
-  //     });
-  //   }
-  // );
 };
 
 export const updateTour = async (req, res, next) => {
