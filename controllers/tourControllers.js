@@ -12,7 +12,6 @@ export const aliasTopTours = (req, res, next) => {
 export const getAllTours = async (req, res, next) => {
   try {
     console.log(req.query);
-
     // EXECUTE QUERY: here we can just delete one of the methods if we dont want to apply them.
     const features = new APIFeatures(Tour.find(), req.query)
     .filter()
@@ -103,3 +102,93 @@ export const deleteTour = async (req, res, next) => {
     next(error)
   }
 };
+
+// AGGREGATION PIPELINE: (using aggregation operators like $match, $group, etc)
+export const getTourStats = async (req, res) => {
+  try {
+    const stats = await Tour.aggregate([
+      {
+        $match: {ratingsAverage: {$gte: 4.5}}
+      },
+      {
+        $group: {
+          // _id: "$difficulty",
+          // _id: "$ratingsAverage",
+          _id: {$toUpper: "$difficulty"},
+          numTours: {$sum: 1},
+          numRating: {$sum: "$ratingsQuantity"},
+          avgRating: {$avg: "$ratingsAverage"},
+          avgPrice: {$avg: "$price"},
+          minPrice: {$min: "$price"},
+          maxPrice: {$max: "$price"},
+        }
+      },
+      {
+        $sort: {avgPrice: 1} // 1 for ascending price
+      }
+      // {
+      //   $match: {_id: {$ne: "EASY"}} // excluding easy data.
+      // }
+    ]);
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        stats
+      },
+    });
+  } catch(error) {
+    next(error)
+  }
+}
+// ANOTHER AGGREGATION PIPELINE (for analyzing tours in 2021)
+export const getMonthlyPlan = async (req, res, next) => {
+  try {
+    const year = req.params.year * 1 // 2021
+    const plan = await Tour.aggregate([
+      {
+        $unwind: "$startDates" // this is creating for every object inside startDate field a document. every Tour got 3 startDates ==> it creates 3 documents for every Tour.
+      },
+      {
+        $match: {
+          startDates: {
+            $gte: new Date(`${year}-01-01`),
+            $lte: new Date(`${year}-12-31`)
+          }
+        }
+      },
+      {
+        $group: {
+          _id: {$month: "$startDates"},
+          numTourStarts: {$sum: 1},
+          tours: {$push: "$name"} // push is creating an array out of the field "name" values, which are matching the conditions (between january 2021 and december 2021)
+        }
+      },
+      {
+        $addFields: {month: "$_id"} // addFields operator is adding the field "month"
+      },
+      {
+        $project: { // project is deleting the field "_id". if we put a "1" it would show up
+          _id: 0
+        }
+      },
+      {
+        $sort: {numTourStarts: -1} // descending order
+      },
+      {
+        $limit: 12 // its limiting the output to 12
+      }
+
+    ])
+    res.status(200).json({
+      status: 'success',
+      result: plan.length,
+      data: {
+        plan
+      },
+    });
+    
+  } catch(error) {
+    next(error)
+  }
+}
