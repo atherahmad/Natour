@@ -5,7 +5,10 @@ const tourSchema = mongoose.Schema({
     name: {
         type: String,
         required: [true, "A tour must have a name"],
-        unique: true
+        unique: true,
+        trim: true,
+        maxlength: [40, "A tour name must have less or equal then 40 characters"],
+        minlength: [10, "A tour name must have more or equal then 10 characters"]
       },
       slug: String,
     duration: {
@@ -18,11 +21,17 @@ const tourSchema = mongoose.Schema({
     },
     difficulty: {
       type: String,
-      required: [true, "A tour must have a difficulty"]
+      required: [true, "A tour must have a difficulty"],
+      enum: {
+        values: ["easy","medium","difficult"],
+        message: "Difficulty is either easy, medium, difficult"
+      }
     },
     ratingsAverage: {
         type: Number,
-        default: 4.5
+        default: 4.5,
+        min: [1, "Rating must be above 1.0"],
+        max: [5, "Rating must be below 5.0"]
     },
     ratingsQuantity: {
       type: Number,
@@ -108,7 +117,7 @@ tourSchema.post(/^find/, function(docs, next) {
 
 // AGGREGATION MIDDLEWARE -  "this" points to the current aggregation-object
 tourSchema.pre("aggregate", function(next) {
-  this.pipeline().unshift({$match: {secretTour: {$ne: true}}}) // unshift is adding an element at the beginning of an array. {$match: {secretTour: {$ne: true}}} removes all the documents where secretTour is set to "true". This means it excludes our secretTour in our aggregation pipeline.
+  this.pipeline().unshift({$match: {secretTour: {$ne: true}}}) // unshift is adding an element at the beginning of an array. We add another stage (condition)'$match': { secretTour: [Object] } to our aggregate-object which you can see in console.log(this.pipeline).  {$match: {secretTour: {$ne: true}}} removes all the documents where secretTour is set to "true". This means it excludes our secretTour in our aggregation pipeline.
   console.log(this.pipeline());
   next()
 })
