@@ -1,7 +1,18 @@
 import AppError from "../utils/appError.js"
 
+// FUNCTIONS FOR GLOBAL ERROR HANDLER:
+// CastError: HANDLE INVALID INPUT
 const handleCastErrorDB = err => {
     const message = `Invalid ${err.path}: ${err.value}.` // path and value are saved in the error object automatically as properties.
+    return new AppError(message, 400)
+}
+
+// MongoError: HANDLE DUPLICATES
+const handleDuplicateFieldsDB = err => {
+    const value = err.message.match(/(["'])(\\?.)*?\1/)[0] // matches all the text between strings ("') [0] picks the first string of the array which you can se in console.log(value) without [0]
+    console.log(value);
+
+    const message = `Duplicate field value: ${value} Please use a different name!` // path and value are saved in the error object automatically as properties.
     return new AppError(message, 400)
 }
 
@@ -36,6 +47,8 @@ const sendErrorProd = (err, res) => {
     
 }
 
+
+// GLOBAL ERROR HANDLER:
 export const globalErrorHandler = (err, req, res, next) => {
 //   console.log(err.stack);
     err.statusCode = err.statusCode || 500
@@ -47,11 +60,15 @@ export const globalErrorHandler = (err, req, res, next) => {
         sendErrorDev(err, res)
 
     } else if (process.env.NODE_ENV === "production") {
-        let {name} = err
+        let {name, code} = err
         console.log(err);
 
         if(name === "CastError") {
             err = handleCastErrorDB(err)
+        }
+
+        if(code === 11000) {
+            err = handleDuplicateFieldsDB(err)
         }
         sendErrorProd(err, res)
     }
