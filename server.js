@@ -21,14 +21,15 @@ mongoose.connect(DB, {
 })
 
 // global error Handler:
-app.use((error, req, res, next) => {
-  res.status(error.status || 500);
-  res.json({
-    error: {
-      message: error.message,
-    },
-  });
-});
+// app.use((error, req, res, next) => {
+//   res.status(error.status || 500);
+//   res.json({
+//     error: {
+//       message: error.message,
+//     },
+//   });
+// });
+
 
 // defining a Schema:
 // const tourSchema = new mongoose.Schema({

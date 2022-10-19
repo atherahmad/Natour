@@ -1,5 +1,6 @@
 import Tour from '../models/tour.js';
 import APIFeatures from '../utils/apiFeatures.js';
+import { catchAsync } from '../utils/catchAsync.js';
 
 // ALIASING : we can manipulate the req.query object before we will use it in getAllTours
 export const aliasTopTours = (req, res, next) => {
@@ -9,8 +10,7 @@ export const aliasTopTours = (req, res, next) => {
   next()
 }
 
-export const getAllTours = async (req, res, next) => {
-  try {
+export const getAllTours = catchAsync(async (req, res, next) => {
     console.log(req.query);
     // EXECUTE QUERY: here we can just delete one of the methods if we dont want to apply them.
     const features = new APIFeatures(Tour.find(), req.query)
@@ -29,13 +29,9 @@ export const getAllTours = async (req, res, next) => {
         tours
       },
     });
-  } catch (error) {
-    next(error)
-  }
-};
+});
 
-export const getTour = async (req, res, next) => {
-  try {
+export const getTour = catchAsync(async (req, res, next) => {
     // const id = req.params.id * 1; // this is a trick which converts automatically a string to a number, when it gets multiplied with a number.
   // const tour = tours.filter((item) => item.id === id); // filters the object with the fitting id property from the array and returns it.
     const tour = await Tour.findById(req.params.id) // shorthand for belows code
@@ -48,13 +44,16 @@ export const getTour = async (req, res, next) => {
       tour
     },
   });
-  } catch (error) {
-      next(error)
-  }
-} 
+})
 
-export const createTour = async (req, res, next) => {
-  try {
+// // CATCHING ERRORS IN ASYNC FUNCTIONS: --> we import it from "./utils/catchAsync.js"
+// const catchAsync = fn => {
+//   return (req, res, next) => {
+//     fn(req, res, next).catch(next) // this allows us to forehand our error which will happen in our promis toour global error handling middleware. We can get rid of the "try/catch" block in createTour. Async functions return promises, where the catch method can be used.
+//   }
+// }
+
+export const createTour = catchAsync(async (req, res, next) => {
     const newTour = await Tour.create(req.body) // this is shorthand for belows code
     // const tour = req.body
     // const newTour = new Tour(tour)
@@ -65,16 +64,9 @@ export const createTour = async (req, res, next) => {
         tour: newTour
     },
     })
-  } catch (error){
-    // res.status(409).json({
-    //   msg: error.message
-    // })
-    next(error)
-  }
-};
+}) 
 
-export const updateTour = async (req, res, next) => {
-  try {
+export const updateTour = catchAsync(async (req, res, next) => {
     const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true
@@ -85,27 +77,19 @@ export const updateTour = async (req, res, next) => {
         tour: tour
       },
     });
-  } catch (error) {
-    next(error)
-  }
-};
+});
 
-export const deleteTour = async (req, res, next) => {
-  try {
+export const deleteTour = catchAsync(async (req, res, next) => {
     await Tour.findByIdAndDelete(req.params.id)
     res.status(204).json({
       // statuscode 204 = no content
       status: 'success',
       data: null,
     });
-  } catch (error) {
-    next(error)
-  }
-};
+});
 
 // AGGREGATION PIPELINE: (using aggregation operators like $match, $group, etc)
-export const getTourStats = async (req, res) => {
-  try {
+export const getTourStats = catchAsync(async (req, res, next) => {
     const stats = await Tour.aggregate([
       {
         $match: {ratingsAverage: {$gte: 4.5}}
@@ -127,7 +111,7 @@ export const getTourStats = async (req, res) => {
         $sort: {avgPrice: 1} // 1 for ascending price
       }
       // {
-      //   $match: {_id: {$ne: "EASY"}} // excluding easy data.
+      //   $match: {_id: {$ne: "EASY"}} // excluding "easy" data.
       // }
     ]);
 
@@ -137,13 +121,9 @@ export const getTourStats = async (req, res) => {
         stats
       },
     });
-  } catch(error) {
-    next(error)
-  }
-}
+})
 // ANOTHER AGGREGATION PIPELINE (for analyzing tours in 2021)
-export const getMonthlyPlan = async (req, res, next) => {
-  try {
+export const getMonthlyPlan = catchAsync(async (req, res, next) => {
     const year = req.params.year * 1 // 2021
     const plan = await Tour.aggregate([
       {
@@ -187,8 +167,4 @@ export const getMonthlyPlan = async (req, res, next) => {
         plan
       },
     });
-    
-  } catch(error) {
-    next(error)
-  }
-}
+})

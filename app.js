@@ -5,6 +5,8 @@ import path from 'path';
 import dotenv from 'dotenv';
 import tourRouter from './routes/tourRoutes.js';
 import userRouter from './routes/userRoutes.js';
+import AppError from "./utils/appError.js"
+import {globalErrorHandler} from "./controllers/errorController.js"
 
 dotenv.config({ path: './config.env' });
 
@@ -23,12 +25,34 @@ app.use(express.static(`${__dirname}/public`)); // when we type now in our brows
 // request time for every request added to the request object as a key.
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
-  console.log(req.requestTime);
   next();
 });
 
 // 3. ROUTES:
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+
+
+// ERROR HANDLING:
+// "all" means all http methods (get,post,delete, etc). "*" means all routes.
+// this middleware should be always at the end of the call-stack. This middleware will never be reached, if the route is defined.
+app.all("*", (req, res, next) => {
+  next(new AppError(`Cant find ${req.originalUrl} on this server`, 404)) // when we pass in the error, the next will skip all the other middleware in the stack and goes to the next error middleware
+})
+
+// Jonas global error handler:
+// by implementing 4 arguments (parameters) express knows, that this is a global error handling middleware
+app.use(globalErrorHandler)
+
+// Dilshod global error handler:
+// app.use((error, req, res, next) => {
+//   res.status(error.status || 500);
+//   res.json({
+//     error: {
+//       message: error.message,
+//     },
+//   });
+// });
+
 
 export default app;
