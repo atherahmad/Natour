@@ -1,13 +1,15 @@
 import AppError from "../utils/appError.js"
 
+
 // FUNCTIONS FOR GLOBAL ERROR HANDLER:
+
 // CastError: HANDLE INVALID INPUT
 const handleCastErrorDB = err => {
     const message = `Invalid ${err.path}: ${err.value}.` // path and value are saved in the error object automatically as properties.
     return new AppError(message, 400)
 }
 
-// MongoError: HANDLE DUPLICATES
+// MongoError: HANDLE DUPLICATE FIELDS
 const handleDuplicateFieldsDB = err => {
     const value = err.message.match(/(["'])(\\?.)*?\1/)[0] // matches all the text between strings ("') [0] picks the first string of the array which you can se in console.log(value) without [0]
     console.log(value);
@@ -16,7 +18,16 @@ const handleDuplicateFieldsDB = err => {
     return new AppError(message, 400)
 }
 
+// MongoError: Validation Error
+const handleValidationErrorDB = err => {
+    const errors = Object.values(err.errors).map(item => item.message)
+    const message = `Invalid input data! ${errors.join(". ")}`
+    return new AppError(message, 400)
+}
 
+
+// DISTINGUISH BETWEEN DEV AND PROD:
+// DEV
 const sendErrorDev = (err, res) => {
     res.status(err.statusCode).json({
         status: err.status,
@@ -26,6 +37,7 @@ const sendErrorDev = (err, res) => {
       })
 }
 
+// PROD
 const sendErrorProd = (err, res) => {
     // Operational, trusted error: send message to client (if the user input invalid data, wants to visit a route which does not exist, etc.)
     if(err.isOperational) {
@@ -60,16 +72,26 @@ export const globalErrorHandler = (err, req, res, next) => {
         sendErrorDev(err, res)
 
     } else if (process.env.NODE_ENV === "production") {
-        let {name, code} = err
+        let {name, code} = err // destructer infos which i need
         console.log(err);
+        console.log(name);
 
+        // castError
         if(name === "CastError") {
             err = handleCastErrorDB(err)
         }
 
+        // duplicate fields
         if(code === 11000) {
             err = handleDuplicateFieldsDB(err)
         }
+
+        // validationError
+        if(name === "ValidationError") {
+            err = handleValidationErrorDB(err)
+        }
+
+        // sending the response to the client
         sendErrorProd(err, res)
     }
   }
