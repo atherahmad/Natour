@@ -1,5 +1,6 @@
 import Tour from '../models/tour.js';
 import APIFeatures from '../utils/apiFeatures.js';
+import AppError from '../utils/appError.js';
 import { catchAsync } from '../utils/catchAsync.js';
 
 // ALIASING : we can manipulate the req.query object before we will use it in getAllTours
@@ -37,6 +38,10 @@ export const getTour = catchAsync(async (req, res, next) => {
     const tour = await Tour.findById(req.params.id) // shorthand for belows code
     // Tour.findOne({ _id: req.params.id}) ---> this works the same like above
 
+    if (!tour) { // if tour is false. means tour value "null" is not a truthy value. --> false
+      return next(new AppError("No tour found with that ID", 404)) // we need return, because we want to end the circle and not res.status(responding) the tour with false ID to the client. (user)
+    }
+
   // we read this object with the fitting id to the client.
     res.status(200).json({
     status: 'success',
@@ -71,6 +76,11 @@ export const updateTour = catchAsync(async (req, res, next) => {
       new: true,
       runValidators: true
     })
+
+    if (!tour) { // if tour is false. means tour value "null" is not a truthy value. --> false
+      return next(new AppError("No tour found with that ID", 404)) // we need return, because we want to end the circle and not udating th tour with wrong ID given by user
+    }
+
     res.status(200).json({
       status: 'success',
       data: {
@@ -80,7 +90,12 @@ export const updateTour = catchAsync(async (req, res, next) => {
 });
 
 export const deleteTour = catchAsync(async (req, res, next) => {
-    await Tour.findByIdAndDelete(req.params.id)
+    const tour = await Tour.findByIdAndDelete(req.params.id)
+
+    if (!tour) { // if tour is false. means tour value "null" is not a truthy value. --> false
+      return next(new AppError("No tour found with that ID", 404)) // we need return, because we want to end the circle and not res.status(responding) the tour with false ID to the client. (user)
+    }
+
     res.status(204).json({
       // statuscode 204 = no content
       status: 'success',
