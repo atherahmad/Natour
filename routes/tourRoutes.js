@@ -1,15 +1,16 @@
 import express from "express"
 import { getAllTours, getTour, createTour, updateTour, deleteTour, aliasTopTours, getTourStats, getMonthlyPlan} from "../controllers/tourControllers.js"
-
+import { protect } from "../controllers/authController.js"
 
 const router = express.Router()
 
-// router.param("id", checkId)
 
+// aggregation pipeline route
 router
 .route("/top-5-cheap")
 .get(aliasTopTours,getAllTours)
 
+// aggregation pipeline route
 router
 .route("/tour-stats")
 .get(getTourStats)
@@ -20,7 +21,7 @@ router
 
 router
 .route("/")
-.get(getAllTours)
+.get(protect, getAllTours) // protect is for protecting the route with authentification by the JWT
 .post(createTour)
 
 router

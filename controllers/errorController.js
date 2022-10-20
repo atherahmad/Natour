@@ -25,6 +25,12 @@ const handleValidationErrorDB = err => {
     return new AppError(message, 400)
 }
 
+// JsonWebTokenError - token not valid
+const handleJsonWebTokenErrorDB = () => new AppError("Invalid token. Please log in again!", 401) // short version of using {return}, when you have a one-liner.
+
+// handleTokenExpiredErrorDB -  token expired
+const handleTokenExpiredErrorDB = () => new AppError("Your token has expired! Please log in again.", 401)
+
 
 // DISTINGUISH BETWEEN DEV AND PROD:
 // DEV
@@ -89,6 +95,15 @@ export const globalErrorHandler = (err, req, res, next) => {
         // validationError
         if(name === "ValidationError") {
             err = handleValidationErrorDB(err)
+        }
+
+        // JsonWebTokenError - when token is not valid
+        if (name === "JsonWebTokenError") {
+            err = handleJsonWebTokenErrorDB()
+        }
+
+        if (name = "TokenExpiredError") {
+            err = handleTokenExpiredErrorDB()
         }
 
         // sending the response to the client

@@ -25,6 +25,8 @@ app.use(express.static(`${__dirname}/public`)); // when we type now in our brows
 // request time for every request added to the request object as a key.
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
+  console.log(req.headers);
+  
   next();
 });
 

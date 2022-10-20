@@ -33,7 +33,8 @@ const userSchema = mongoose.Schema({
           },
           message: "password must be the same"
         }
-      }
+      },
+    passwordChangedAt: Date
 })
 
 // ENCRYPTION OF THE PASSWORDS: this function applies before the document gets saved to the DB --> we need to install extra package "bcryptjs"
@@ -52,6 +53,18 @@ userSchema.pre("save", async function(next) {
 // INSTANCE METHOD: available on all Documents of a certain Collection.
 userSchema.methods.correctPassword = async function(candidatePassword, userPassword) {
   return  await bcrypt.compare(candidatePassword, userPassword) // this.password is not available in the output due to select: false in the model. bcrypt.compare() returns true if passwords are the same or false if not.
+}
+
+userSchema.methods.changedPasswordAfter = function(JWTTimestamp) {
+  if(this.passwordChangedAt) {
+    const changedTimestamp = parseInt(this.passwordChangedAt.getTime() / 1000, 10)
+
+    // console.log(changedTimestamp, JWTTimestamp);
+    return JWTTimestamp < changedTimestamp // 100 < 200 (JWTTimestamp = time when the token was created; changedTimestamp = time when the password was changed)
+  }
+
+  // false means password not changed
+  return false
 }
 
 // creating a Model out of it: Model variables always wih capital Letter.
