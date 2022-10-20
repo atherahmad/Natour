@@ -35,7 +35,7 @@ const userSchema = mongoose.Schema({
       }
 })
 
-// ENCRIPTION OF THE PASSWORDS: this function applies before the document gets saved to the DB --> we need to install extra package "bcryptjs"
+// ENCRYPTION OF THE PASSWORDS: this function applies before the document gets saved to the DB --> we need to install extra package "bcryptjs"
 // thats the way to store users passwords in a secure way to our DB
 userSchema.pre("save", async function(next) {
   if(!this.isModified("password")) { // "isModified" is a mongoose method. You need to pass the field of the model which gets updated. (password) --> if the password didnt get modified the execution goes on to the next middleware.
