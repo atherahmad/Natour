@@ -7,6 +7,7 @@ const port = process.env.PORT || 3000;
 // placing "<PASSWORD>" in the connection string in config.env with our user Password. Which is saved in environmental variables.
 const DB = process.env.DATABASE.replace("<PASSWORD>", process.env.DATABASE_PASSWORD)
 
+
 // connection to hosted ATLAS database
 mongoose.connect(DB, {
   useNewUrlParser: true,
@@ -15,10 +16,26 @@ mongoose.connect(DB, {
   useUnifiedTopology: true
 })
 .then(() => 
-  app.listen(port, console.log(`DB connected and listening on ${port}`)))
+ app.listen(port, console.log(`DB connected and listening on ${port}`)))
 .catch((err) => {
   console.log(`${err} dit not connect...`);
 })
+
+
+process.on("unhandledRejection", err => {
+  console.log("UNHANDLED REJECTION! Shutting down...");
+  console.log(err.name, err.message);
+  server.close(() => {
+    process.exit(1)
+  })
+}) 
+
+process.on("uncaughtException", err => {
+  console.log("UNCAUGHT EXCEPTION! Shutting down...");
+  console.log(err.name, err.message);
+  process.exit(1)
+})
+// console.log(x);
 
 // global error Handler:
 // app.use((error, req, res, next) => {
