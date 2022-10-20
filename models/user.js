@@ -20,7 +20,8 @@ const userSchema = mongoose.Schema({
     password: {
         type: String,
         required: [true, "A user must have a password"],
-        minlength: 8
+        minlength: 8,
+        select: false // we dont want to show the password to the client. We just want to store it in the DB
       },
     confirmPassword: {
         type: String,
@@ -48,12 +49,10 @@ userSchema.pre("save", async function(next) {
   }
 })
 
-// userSchema.pre("save", function(next) {
-//   // console.log(this);
-//   this.confirmPassword = undefined
-//   // this.slug = slugify(this.name, {lower: true}) // slug creates a string based of the current processed documents "name" field
-//   next()
-// })
+// INSTANCE METHOD: available on all Documents of a certain Collection.
+userSchema.methods.correctPassword = async function(candidatePassword, userPassword) {
+  return  await bcrypt.compare(candidatePassword, userPassword) // this.password is not available in the output due to select: false in the model. bcrypt.compare() returns true if passwords are the same or false if not.
+}
 
 // creating a Model out of it: Model variables always wih capital Letter.
 const User = mongoose.model("User",userSchema)
