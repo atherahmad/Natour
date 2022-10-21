@@ -17,6 +17,11 @@ const userSchema = mongoose.Schema({
         lowercase: true
       },
     photo: String,
+    role: {
+      type: String,
+      enum: ["user", "guide", "lead-guide", "admin"],
+      default: "user"
+    },
     password: {
         type: String,
         required: [true, "A user must have a password"],
@@ -50,7 +55,8 @@ userSchema.pre("save", async function(next) {
   }
 })
 
-// INSTANCE METHOD: available on all Documents of a certain Collection.
+// INSTANCE METHOD: 
+// available on all Documents of a certain Collection.
 userSchema.methods.correctPassword = async function(candidatePassword, userPassword) {
   return  await bcrypt.compare(candidatePassword, userPassword) // this.password is not available in the output due to select: false in the model. bcrypt.compare() returns true if passwords are the same or false if not.
 }
@@ -66,6 +72,7 @@ userSchema.methods.changedPasswordAfter = function(JWTTimestamp) {
   // false means password not changed
   return false
 }
+
 
 // creating a Model out of it: Model variables always wih capital Letter.
 const User = mongoose.model("User",userSchema)

@@ -20,7 +20,8 @@ export const signup = catchAsync(async (req, res, next) => {
         email: req.body.email,
         password: req.body.password,
         passwordChangedAt: req.body.passwordChangedAt,
-        confirmPassword: req.body.confirmPassword
+        confirmPassword: req.body.confirmPassword,
+        role: req.body.role
     })
 
     // JWT - Login Users with secure JWT
@@ -97,4 +98,15 @@ export const protect = catchAsync(async(req, res, next) => {
     req.user = currentUser
     next()
 })
+
+// Tis function just gives permission for users with role "admin" or "lead-guide" to access the next middleware "deleteTour".
+export const restrictTo = (...roles) => {
+    return (req, res, next) => { // this middleware function has access to the roles, which are given in as parameter in "tourRoutes.js" due to the closure.
+        // roles ["admin", "lead-guide"]. role = "user"
+        if (!roles.includes(req.user.role)) {
+            return next(new AppError("You do not have permission to perform that action", 403))
+        }
+        next()
+    }
+}
 
