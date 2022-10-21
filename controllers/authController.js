@@ -99,7 +99,7 @@ export const protect = catchAsync(async(req, res, next) => {
     next()
 })
 
-// Tis function just gives permission for users with role "admin" or "lead-guide" to access the next middleware "deleteTour".
+// This function just gives permission for users with role "admin" or "lead-guide" to access the next middleware "deleteTour".
 export const restrictTo = (...roles) => {
     return (req, res, next) => { // this middleware function has access to the roles, which are given in as parameter in "tourRoutes.js" due to the closure.
         // roles ["admin", "lead-guide"]. role = "user"
@@ -110,3 +110,19 @@ export const restrictTo = (...roles) => {
     }
 }
 
+// provide email address, than you got en Email with a link inside where you click on. This click leads you to another website, where you can change (update) your password.
+export const forgotPassword = catchAsync(async (req, res, next) => {
+    // 1) Get user based on POSTed email
+    const user = await User.findOne({email: req.body.email})
+    if (!user) {
+        return next(new AppError("There is no user with this email address.", 404))
+    }
+    // 2) Generate the random reset token
+    const resetToken = user.createPasswordResetToken()
+    await user.save({validateBeforeSave: false}) // this deactivate all the validators which we specified in our user schema. We add this property to our current user.
+    // 3) Send it to users email
+})
+
+export const resetPassword = (req, res, next) => {
+
+}

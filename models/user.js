@@ -1,6 +1,7 @@
 import mongoose from "mongoose"
 import validator from "validator"
 import bcrypt from "bcryptjs"
+import crypto from "crypto"
 
 const userSchema = mongoose.Schema({
     name: {
@@ -39,7 +40,10 @@ const userSchema = mongoose.Schema({
           message: "password must be the same"
         }
       },
-    passwordChangedAt: Date
+    // security
+    passwordChangedAt: Date,
+    passwordResetToken: String,
+    passwordResetExpires: Date
 })
 
 // ENCRYPTION OF THE PASSWORDS: this function applies before the document gets saved to the DB --> we need to install extra package "bcryptjs"
@@ -57,10 +61,12 @@ userSchema.pre("save", async function(next) {
 
 // INSTANCE METHOD: 
 // available on all Documents of a certain Collection.
+// checks if password is correct
 userSchema.methods.correctPassword = async function(candidatePassword, userPassword) {
   return  await bcrypt.compare(candidatePassword, userPassword) // this.password is not available in the output due to select: false in the model. bcrypt.compare() returns true if passwords are the same or false if not.
 }
 
+// checks if password was changed after creating token (login) JWTtimestamp
 userSchema.methods.changedPasswordAfter = function(JWTTimestamp) {
   if(this.passwordChangedAt) {
     const changedTimestamp = parseInt(this.passwordChangedAt.getTime() / 1000, 10)
@@ -71,6 +77,22 @@ userSchema.methods.changedPasswordAfter = function(JWTTimestamp) {
 
   // false means password not changed
   return false
+}
+
+// Reset the JWT Token
+// import crypto (build in module of node.js)
+userSchema.methods.createPasswordResetToken = function() {
+  const resetToken = crypto.randomBytes(32).toString("hex") // this is creating a new "secret" (32 character string) Like we already stored in our config.env file.
+
+  // we need to encrypt our reseted token for security reasons
+  // sha256 is an algorythm
+  // update our 32 character String encrypted.
+  this.passwordResetToken = crypto.createHash("sha256").update(resetToken).digest("hex")
+
+  console.log({resetToken}, this.passwordResetToken);
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000 // for 10 minutes, for seconds, for milli-seconds --> new reset token expires after 10 minutes!
+
+  return resetToken
 }
 
 
