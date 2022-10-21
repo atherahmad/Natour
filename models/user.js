@@ -85,14 +85,14 @@ userSchema.methods.createPasswordResetToken = function() {
   const resetToken = crypto.randomBytes(32).toString("hex") // this is creating a new "secret" (32 character string) Like we already stored in our config.env file.
 
   // we need to encrypt our reseted token for security reasons
-  // sha256 is an algorythm
+  // sha256 is an algorithm
   // update our 32 character String encrypted.
   this.passwordResetToken = crypto.createHash("sha256").update(resetToken).digest("hex")
 
   console.log({resetToken}, this.passwordResetToken);
   this.passwordResetExpires = Date.now() + 10 * 60 * 1000 // for 10 minutes, for seconds, for milli-seconds --> new reset token expires after 10 minutes!
 
-  return resetToken
+  return resetToken // we return the 32 character string (secret) to send it in the next step to the user
 }
 
 

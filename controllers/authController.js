@@ -2,6 +2,7 @@ import User from "../models/user.js";
 import { catchAsync } from "../utils/catchAsync.js";
 import jwt from "jsonwebtoken"
 import AppError from "../utils/appError.js";
+import sendEmail from "../utils/email.js";
 import {promisify} from "util"; // util is a build in Object of Node.js. We destructure the method promisify from it to use it in our Verification below
 
 
@@ -112,16 +113,42 @@ export const restrictTo = (...roles) => {
 
 // provide email address, than you got en Email with a link inside where you click on. This click leads you to another website, where you can change (update) your password.
 export const forgotPassword = catchAsync(async (req, res, next) => {
+
     // 1) Get user based on POSTed email
     const user = await User.findOne({email: req.body.email})
     if (!user) {
         return next(new AppError("There is no user with this email address.", 404))
     }
+
     // 2) Generate the random reset token
     const resetToken = user.createPasswordResetToken()
-    await user.save({validateBeforeSave: false}) // this deactivate all the validators which we specified in our user schema. We add this property to our current user.
+    await user.save({validateBeforeSave: false}) // this deactivate all the validators which we specified in our user schema. We add this property to our current user. And we save the encrypted string to our DB
+
     // 3) Send it to users email
+    const resetURL = `${req.protocol}://${req.get("host")}/api/v1/users/resetPassword/${resetToken}`
+
+    const message = `Forgot your password? Submit a PATCH request with your new password and confirmPassword to: ${resetURL}.\nIf you didnt forget your password, please ignore this email!` // "\n" means new line.
+
+    try {
+        await sendEmail({
+            email: user.email,
+            subject: "Your password reset token (valid for 10 min)", // We send email to "user.email" with Betreff "Your password reset token(valid for 10 min)" and message "Forgot your password? Submit a PATCH.... etc"
+            message
+        })
+    
+        res.status(200).json({
+            status: "success",
+            message: "Token sent to email!"
+        })
+    } catch(err) {
+        user.createPasswordResetToken = undefined
+        user.passwordResetExpires = undefined
+        await user.save({validateBeforeSave: false})
+
+        return next(new AppError("There was an error sending the email. Try again later!", 500))
+    }
 })
+    
 
 export const resetPassword = (req, res, next) => {
 

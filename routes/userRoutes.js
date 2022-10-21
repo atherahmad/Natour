@@ -23,8 +23,8 @@ router
 
 // reset Password
 router
-.route("/resetPassword")
-.post(resetPassword)
+.route("/resetPassword/:token")
+.patch(resetPassword)
 
 router
 .route("/")
