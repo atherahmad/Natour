@@ -59,6 +59,14 @@ userSchema.pre("save", async function(next) {
   }
 })
 
+// Update passwordChangedAt property for the user when he changed the password
+userSchema.pre("save", function(next) {
+  if (!this.isModified("password") || this.isNew) return next() // means if the field "password" didnt get modified or its a new document --> middleware jumps to next middleware
+
+  this.passwordChangedAt = Date.now() - 1000 // if it got updated, change the passwordChangeAt property to current time. we do "-1" because sometimes saving to the DB is a bit slower than creating the JWT. That the changedPasswordTimestamp is sometimes st a bit after the JWT has been created. User wouldnt be able to login, because JWT would already be expired.
+  next()
+})
+
 // INSTANCE METHOD: 
 // available on all Documents of a certain Collection.
 // checks if password is correct

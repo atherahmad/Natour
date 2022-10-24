@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken"
 import AppError from "../utils/appError.js";
 import sendEmail from "../utils/email.js";
 import {promisify} from "util"; // util is a build in Object of Node.js. We destructure the method promisify from it to use it in our Verification below
+import crypto from "crypto"
 
 
 const signToken = id => {
@@ -111,6 +112,7 @@ export const restrictTo = (...roles) => {
     }
 }
 
+// FORGOT PASSWORD
 // provide email address, than you got en Email with a link inside where you click on. This click leads you to another website, where you can change (update) your password.
 export const forgotPassword = catchAsync(async (req, res, next) => {
 
@@ -150,6 +152,33 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
 })
     
 
-export const resetPassword = (req, res, next) => {
+// RESET PASSWORD
+export const resetPassword = catchAsync(async(req, res, next) => {
 
-}
+    // 1) get user based on the token
+    const hashedToken = crypto.createHash("sha256").update(req.params.token).digest("hex") // its req.params.token because we defined the route in userRoutes.js like that.
+
+    const user = await User.findOne({passwordResetToken: hashedToken, passwordResetExpires: {$gt: Date.now()}}) // we check if the expiring Date of the token is still greater then the current time. (still valid)
+
+    // 2) If token has not expired, and there is a user, set the new password
+    if (!user) {
+        return next(new AppError("Token is invalid or has expired!", 400))
+    }
+
+    // here we are updating the current user objects properties like password,confirmPassword, passwordResetToken, passwordResetExpires and save it
+    user.password = req.body.password
+    user.confirmPassword = req.body.confirmPassword
+    user.passwordResetToken = undefined
+    user.passwordResetExpires = undefined
+    await user.save()
+
+    // 3) Update passwordChangedAt property for the user
+    // we do this in our user model as a pre save middleware!
+    
+    // 4) Log the user in, send JWT
+    const token = signToken(user._id)
+    res.status(200).json({
+        status: "success",
+        token
+    })
+})
