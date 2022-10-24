@@ -13,6 +13,19 @@ const signToken = id => {
     })
 }
 
+const createSendToken = (user, statusCode, res) => {
+    const token = signToken(user._id) // --> the object "{id: newUser._id}" is the payload which we add to our JWT. Second parameter is our "secret" with at least 32 characters. We store it in config.env. third parameter is an additional option. The "JWT Header "will be added automatically from JWT package.
+    // we can use the debugger on "jwt.io" to look at our token.(Header,Payload,Secret)
+
+    res.status(statusCode).json({
+        status: "success",
+        token,
+        data: {
+            user
+        }
+    })
+}
+
 // SIGN UP
 export const signup = catchAsync(async (req, res, next) => {
     // const newUser = await User.create(req.body)
@@ -29,16 +42,7 @@ export const signup = catchAsync(async (req, res, next) => {
     // JWT - Login Users with secure JWT
     // for authentification we install the package "jsonwebtoken"
     // documentation on github. We can use jwt methods like (sign, verify, etc)
-    const token = signToken(newUser._id) // --> the object "{id: newUser._id}" is the payload which we add to our JWT. Second parameter is our "secret" with at least 32 characters. We store it in config.env. third parameter is an additional option. The "JWT Header "will be added automatically from JWT package.
-    // we can use the debugger on "jwt.io" to look at our token.(Header,Payload,Secret)
-
-    res.status(201).json({
-        status: 'success',
-        token,
-        data: {
-            user: newUser
-        },
-    })
+    createSendToken(newUser, 201, res)
 })
 
 // LOGIN
@@ -61,11 +65,7 @@ export const login = catchAsync(async (req, res, next) => {
     }
 
     // 3) If everything ok, send token to client
-    const token = signToken(user._id)
-    res.status(200).json({
-        status: "success",
-        token
-    })
+    createSendToken(user, 200, res)
 })
 
 // PROTECT ROUTES FOR LOGGED IN USERS:
@@ -174,11 +174,27 @@ export const resetPassword = catchAsync(async(req, res, next) => {
 
     // 3) Update passwordChangedAt property for the user
     // we do this in our user model as a pre save middleware!
-    
+
     // 4) Log the user in, send JWT
-    const token = signToken(user._id)
-    res.status(200).json({
-        status: "success",
-        token
-    })
+    createSendToken(user, 200, res)
+})
+
+
+// We need to ask the user to write their credentials, before updating the password. If your logged in and a stranger person is changeing you password and logs you out without being prompted for the current password before, you loose your account.
+export const updatePassword = catchAsync(async(req, res, next) => {
+    // 1) Get user from collection
+    const user = await User.findById(req.user.id).select("+password")
+    console.log(req.user);
+    // 2) Check is POSTed password is correct
+    if(!(await user.correctPassword(req.body.passwordCurrent, user.password))) {
+        return next(new AppError("Your current password is wrong!", 401))
+    }
+    // 3) If so, update password
+    user.password = req.body.password
+    user.confirmPassword = req.body.confirmPassword
+    await user.save() // we are not turning off the validations of the model because we want it for passwords and emails. User.findByIdAndUpdate will not work!
+
+    // 4) Log user in, send JWT
+    createSendToken(user, 200, res)
+
 })

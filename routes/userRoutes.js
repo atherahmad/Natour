@@ -1,6 +1,6 @@
 import express from "express";
 import { getAllUsers, getUser, createUser, updateUser, deleteUser } from "../controllers/userControllers.js";
-import { signup, login, forgotPassword, resetPassword } from "../controllers/authController.js";
+import { signup, login, forgotPassword, resetPassword, protect, updatePassword } from "../controllers/authController.js";
 
 
 
@@ -25,6 +25,10 @@ router
 router
 .route("/resetPassword/:token")
 .patch(resetPassword)
+
+router
+.route("/updateMyPassword")
+.patch(protect, updatePassword)
 
 router
 .route("/")
