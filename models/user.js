@@ -43,7 +43,12 @@ const userSchema = mongoose.Schema({
     // security
     passwordChangedAt: Date,
     passwordResetToken: String,
-    passwordResetExpires: Date
+    passwordResetExpires: Date,
+    active: {
+      type: Boolean,
+      default: true,
+      select: false
+    }
 })
 
 // ENCRYPTION OF THE PASSWORDS: this function applies before the document gets saved to the DB --> we need to install extra package "bcryptjs"
@@ -66,6 +71,14 @@ userSchema.pre("save", function(next) {
   this.passwordChangedAt = Date.now() - 1000 // if it got updated, change the passwordChangeAt property to current time. we do "-1" because sometimes saving to the DB is a bit slower than creating the JWT. That the changedPasswordTimestamp is sometimes st a bit after the JWT has been created. User wouldnt be able to login, because JWT would already be expired.
   next()
 })
+
+// query middleware for not showing inactive (deleted) users
+userSchema.pre(/^find/, function(next) { // using regular expression which looks for words in query event which start with "find"
+  // this points to current query
+  this.find({active: {$ne: false}}) // before the find query is executed, we change our query to just finding documents with the field "active: true" ($ne: false) --> because in earlier documents we didnt set the field active yet.
+  next()
+})
+
 
 // INSTANCE METHOD: 
 // available on all Documents of a certain Collection.
@@ -98,7 +111,7 @@ userSchema.methods.createPasswordResetToken = function() {
   this.passwordResetToken = crypto.createHash("sha256").update(resetToken).digest("hex")
 
   console.log({resetToken}, this.passwordResetToken);
-  this.passwordResetExpires = Date.now() + 10 * 60 * 1000 // for 10 minutes, for seconds, for milli-seconds --> new reset token expires after 10 minutes!
+  this.passwordResetExpires = Date.now() + 60 * 60 * 1000 // for 60 minutes, for seconds, for milli-seconds --> new reset token expires after 10 minutes!
 
   return resetToken // we return the 32 character string (secret) to send it in the next step to the user
 }

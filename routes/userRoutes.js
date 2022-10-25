@@ -1,5 +1,5 @@
 import express from "express";
-import { getAllUsers, getUser, createUser, updateUser, deleteUser } from "../controllers/userControllers.js";
+import { getAllUsers, getUser, createUser, updateUser, deleteUser, updateCurrentUserData, deleteCurrentUser } from "../controllers/userControllers.js";
 import { signup, login, forgotPassword, resetPassword, protect, updatePassword } from "../controllers/authController.js";
 
 
@@ -26,9 +26,20 @@ router
 .route("/resetPassword/:token")
 .patch(resetPassword)
 
+// update current user password
 router
 .route("/updateMyPassword")
 .patch(protect, updatePassword)
+
+// update current user data
+router
+.route("/updateMe")
+.patch(protect, updateCurrentUserData)
+
+// delete current user (set active to false)
+router
+.route("/deleteMe")
+.delete(protect, deleteCurrentUser)
 
 router
 .route("/")
