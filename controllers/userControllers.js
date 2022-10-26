@@ -31,6 +31,7 @@ export const updateCurrentUserData = catchAsync(async (req, res, next) => {
 
   // 2) Filtered out unwanted field names of the req.body object that are not allowed to be updated!
   const filteredBody = filterObj(req.body, "name", "email")
+  console.log(filteredBody);
 
   // 3) Update user document
   // we are not passing as the second parameter req.body because we dont want to allow the user to update every field. for example:
@@ -59,8 +60,7 @@ export const deleteCurrentUser = catchAsync(async(req, res, next) => {
   })
 })
 
-export const getUser = async (req, res, next) => {
-  try {
+export const getUser = catchAsync(async (req, res, next) => {
     const user = await User.findById(req.params.id) // shorthand for belows code
     // User.findOne({ _id: req.params.id}) ---> this works the same like above
 
@@ -71,13 +71,9 @@ export const getUser = async (req, res, next) => {
       user
     },
   });
-  } catch (error) {
-      next(error)
-  }
-};
+});
 
-export const createUser = async (req, res, next) => {
-  try {
+export const createUser = catchAsync(async (req, res, next) => {
     const newUser = await User.create(req.body) // this is shorthand for belows code
     // const user = req.body
     // const newUser = new User(user)
@@ -88,13 +84,9 @@ export const createUser = async (req, res, next) => {
         user: newUser
     },
     })
-  } catch (error) {
-    next(error)
-  }
-};
+});
 
-export const updateUser = async (req, res, next) => {
-  try {
+export const updateUser = catchAsync(async (req, res, next) => {
     const user = await User.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true
@@ -105,20 +97,13 @@ export const updateUser = async (req, res, next) => {
         user: user
       },
     });
-  } catch (error) {
-    next(error)
-  }
-};
+});
 
-export const deleteUser = async (req, res, next) => {
-  try {
+export const deleteUser = catchAsync(async (req, res, next) => {
     await User.findByIdAndDelete(req.params.id)
     res.status(204).json({
       // statuscode 204 = no content
       status: 'success',
       data: null,
     });
-  } catch (error) {
-    next(error)
-  }
-};
+});
