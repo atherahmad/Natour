@@ -40,7 +40,7 @@ export const signup = catchAsync(async (req, res, next) => {
     })
 
     // JWT - Login Users with secure JWT
-    // for authentification we install the package "jsonwebtoken"
+    // for authentication we install the package "jsonwebtoken"
     // documentation on github. We can use jwt methods like (sign, verify, etc)
     createSendToken(newUser, 201, res)
 })
@@ -127,12 +127,12 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
     await user.save({validateBeforeSave: false}) // this deactivate all the validators which we specified in our user schema. We add this property to our current user. And we save the encrypted string to our DB
 
     // 3) Send it to users email
-    const resetURL = `${req.protocol}://${req.get("host")}/api/v1/users/resetPassword/${resetToken}`
+    const resetURL = `${req.protocol}://${req.get("host")}/api/v1/users/resetPassword/${resetToken}` // we are sending the plain resetToken and not the encrypted one!
 
     const message = `Forgot your password? Submit a PATCH request with your new password and confirmPassword to: ${resetURL}.\nIf you didnt forget your password, please ignore this email!` // "\n" means new line.
 
     try {
-        await sendEmail({
+        await sendEmail({ // sendEmail is a async function which returns a promise, thats why we need to await it.
             email: user.email,
             subject: "Your password reset token (valid for 10 min)", // We send email to "user.email" with Betreff "Your password reset token(valid for 10 min)" and message "Forgot your password? Submit a PATCH.... etc"
             message
@@ -152,11 +152,11 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
 })
     
 
-// RESET PASSWORD
+// RESET PASSWORD - In Postman we need to copy our generated Token into URL which we got via Email after hitting forgotPassword route.
 export const resetPassword = catchAsync(async(req, res, next) => {
 
     // 1) get user based on the token
-    const hashedToken = crypto.createHash("sha256").update(req.params.token).digest("hex") // its req.params.token because we defined the route in userRoutes.js like that.
+    const hashedToken = crypto.createHash("sha256").update(req.params.token).digest("hex") // its req.params.token because we defined the route in userRoutes.js like that. We need to encrypt the token again because we want to search in our User Model (DB) for the document with same value. We stored in DB the encrypted token.
 
     const user = await User.findOne({passwordResetToken: hashedToken, passwordResetExpires: {$gt: Date.now()}}) // we check if the expiring Date of the token is still greater then the current time. (still valid)
 
@@ -170,7 +170,7 @@ export const resetPassword = catchAsync(async(req, res, next) => {
     user.confirmPassword = req.body.confirmPassword
     user.passwordResetToken = undefined
     user.passwordResetExpires = undefined
-    await user.save()
+    await user.save() // we are not turning off the validation here because we want to confirm, that the password is correct etc.
 
     // 3) Update passwordChangedAt property for the user
     // we do this in our user model as a pre save middleware!
@@ -185,7 +185,7 @@ export const updatePassword = catchAsync(async(req, res, next) => {
     // 1) Get user from collection
     const user = await User.findById(req.user.id).select("+password")
     console.log(req.user);
-    // 2) Check is POSTed password is correct
+    // 2) Check if POSTed password is correct
     if(!(await user.correctPassword(req.body.passwordCurrent, user.password))) {
         return next(new AppError("Your current password is wrong!", 401))
     }

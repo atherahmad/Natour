@@ -16,7 +16,7 @@ router
 .route("/login")
 .post(login)
 
-// update Password --> Forgot "Password page" --> creating new token
+// Forgot "Password page" --> creating new token
 router
 .route("/forgotPassword")
 .post(forgotPassword)

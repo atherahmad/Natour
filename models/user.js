@@ -111,7 +111,7 @@ userSchema.methods.createPasswordResetToken = function() {
   this.passwordResetToken = crypto.createHash("sha256").update(resetToken).digest("hex")
 
   console.log({resetToken}, this.passwordResetToken);
-  this.passwordResetExpires = Date.now() + 60 * 60 * 1000 // for 60 minutes, for seconds, for milli-seconds --> new reset token expires after 10 minutes!
+  this.passwordResetExpires = Date.now() + 6000 * 60 * 1000 // for 60 minutes, for seconds, for milli-seconds --> new reset token expires after 10 minutes!
 
   return resetToken // we return the 32 character string (secret) to send it in the next step to the user
 }
@@ -121,3 +121,4 @@ userSchema.methods.createPasswordResetToken = function() {
 const User = mongoose.model("User",userSchema)
 
 export default User
+
