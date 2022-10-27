@@ -17,6 +17,20 @@ const createSendToken = (user, statusCode, res) => {
     const token = signToken(user._id) // --> the object "{id: newUser._id}" is the payload which we add to our JWT. Second parameter is our "secret" with at least 32 characters. We store it in config.env. third parameter is an additional option. The "JWT Header "will be added automatically from JWT package.
     // we can use the debugger on "jwt.io" to look at our token.(Header,Payload,Secret)
 
+    // CREATING COOKIE --> res.cookie("cookieName", cookieValue, {options})
+    // is a small piece of text which a server sends to clients. When client receives the cookie it will automatically be stored and send back along with all future requests to the same server.
+    const cookieOptions = {
+        expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000), // converting to milliseconds
+        // secure: true, // cookie will only send on encrypted connection (https)
+        httpOnly: true // cookie can not be accessed or modified in any way by the browser (Cross-Site scripting attacks)
+    }
+
+    if (process.env.NODE_ENV === "production") cookieOptions.secure = true // we just want to set this option in production mode
+
+    res.cookie("jwt", token, cookieOptions)
+    // console.log(cookieOptions);
+
+
     res.status(statusCode).json({
         status: "success",
         token,
