@@ -21,7 +21,7 @@ router
 
 router
 .route("/")
-.get(protect, getAllTours) // protect is for protecting the route with authentification by the JWT
+.get(protect, getAllTours) // protect is for protecting the route with authentication by the JWT
 .post(createTour)
 
 router

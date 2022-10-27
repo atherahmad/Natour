@@ -1,6 +1,7 @@
 import mongoose from "mongoose"
 import slugify from "slugify"
 import validator from "validator"
+import User from "./user.js"
 
 const tourSchema = mongoose.Schema({
     name: {
@@ -76,7 +77,35 @@ const tourSchema = mongoose.Schema({
     secretTour: {
       type: Boolean,
       default: false
-    }
+    },
+    // EMBEDDED/DENORMALIZED DATA SET
+    // adding startLocation as a subfield - This is the way to go. At least 2 fields with type and coordinates
+    startLocation: { // these subfields have the same structure like in the tours.json
+      // GeoJSON
+      type: {
+        type: String,
+        default: "Point",
+        enum: ["Point"]
+      },
+      coordinates: [Number],
+      address: String,
+      description: String
+    },
+    //adding locations as a subfield
+    locations: [ // specification of array of objects will create new Documents inside of the parent Document which is tour. Inside the field locations
+      {
+        type: { // field names are the same as in the tours.json which we will import in our DB
+          type: String,
+          default: "Point",
+          enum: ["Point"]
+        },
+        coordinates: [Number],
+        address: String,
+        description: String,
+        day: Number
+      }
+    ],
+    guides: Array
   },
   {
     toJSON: {virtuals: true},
@@ -96,6 +125,12 @@ tourSchema.virtual("durationWeeks").get(function() {
 tourSchema.pre("save", function(next) {
   // console.log(this);
   this.slug = slugify(this.name, {lower: true}) // slug creates a string based of the current processed documents "name" field
+  next()
+})
+
+tourSchema.pre("save", async function(next) {
+  const guidesPromises = this.guides.map(async item => await User.findById(item)) // guides = [id, id, id, ...]
+  this.guides = await Promise.all(guidesPromises) // Promise.all(guidesPromises) convert the Promises
   next()
 })
 
