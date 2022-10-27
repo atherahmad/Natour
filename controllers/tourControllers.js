@@ -35,9 +35,8 @@ export const getAllTours = catchAsync(async (req, res, next) => {
 export const getTour = catchAsync(async (req, res, next) => {
     // const id = req.params.id * 1; // this is a trick which converts automatically a string to a number, when it gets multiplied with a number.
   // const tour = tours.filter((item) => item.id === id); // filters the object with the fitting id property from the array and returns it.
-    const tour = await Tour.findById(req.params.id) // shorthand for belows code
-    // Tour.findOne({ _id: req.params.id}) ---> this works the same like above
-
+    const tour = await Tour.findById(req.params.id)
+   
     if (!tour) { // if tour is false. means tour value "null" is not a truthy value. --> false
       return next(new AppError("No tour found with that ID", 404)) // we need return, because we want to end the circle and not res.status(responding) the tour with false ID to the client. (user)
     }

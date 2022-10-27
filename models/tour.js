@@ -1,7 +1,7 @@
 import mongoose from "mongoose"
 import slugify from "slugify"
 import validator from "validator"
-import User from "./user.js"
+// import User from "./user.js"
 
 const tourSchema = mongoose.Schema({
     name: {
@@ -105,7 +105,13 @@ const tourSchema = mongoose.Schema({
         day: Number
       }
     ],
-    guides: Array
+    // guides: Array - (embedded)
+    guides: [ // this is referencing. Output wont be the whole user with the id. It will be just an array of id´s
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: "User"
+      }
+    ]
   },
   {
     toJSON: {virtuals: true},
@@ -128,29 +134,27 @@ tourSchema.pre("save", function(next) {
   next()
 })
 
-tourSchema.pre("save", async function(next) {
-  const guidesPromises = this.guides.map(async item => await User.findById(item)) // guides = [id, id, id, ...]
-  this.guides = await Promise.all(guidesPromises) // Promise.all(guidesPromises) convert the Promises
-  next()
-})
-
-// tourSchema.pre("save", function(next) {
-//   console.log("Will save document...");
+// pre save middleware for updating the field guides, which is an Array in tour models subfield guides (embedded)
+// tourSchema.pre("save", async function(next) {
+//   const guidesPromises = this.guides.map(async item => await User.findById(item)) // guides = [id, id, id, ...]
+//   this.guides = await Promise.all(guidesPromises) // Promise.all(guidesPromises) convert the Promises
 //   next()
 // })
-
-// // post middleware functions are executed after all pre middleware has been completed
-// tourSchema.post("save", function(doc, next) {
-//   console.log(doc);
-//   next()
-// })
-
 
 // QUERY MIDDLEWARE: "pre find hook". Middleware which runs before any "find()" query is executed. Here we have access to the current query-object and not the current document with using "this"!
 tourSchema.pre(/^find/, function(next) { // this regular expression targets all strings which are start with "find". We do this because in our middleware, where we want to findByID we use the "findOne" method. When we use this we dont want to find our secret Tour. This regular expression includes the findOn method.
   // tourSchema.pre("find", function(next) {
   this.find({secretTour: {$ne: true}})
   this.start = Date.now()
+  next()
+})
+
+// middleware for manipulating query before find() executes.
+tourSchema.pre(/^find/, function(next) {
+  this.populate({ // populate(fieldName) // we fill the field guide with the actual data instead of just showing the id of the users. we replace the id with the users data.
+    path: "guides", // field we want to update
+    select: "-__v -passwordChangedAt" // which fields we want to exclude
+  })
   next()
 })
 
