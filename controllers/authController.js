@@ -25,10 +25,13 @@ const createSendToken = (user, statusCode, res) => {
         httpOnly: true // cookie can not be accessed or modified in any way by the browser (Cross-Site scripting attacks)
     }
 
-    if (process.env.NODE_ENV === "production") cookieOptions.secure = true // we just want to set this option in production mode
+    if (process.env.NODE_ENV === "production") cookieOptions.secure = true // we just want to set this option in production mode to be able to send the cookie in dev mode.
 
-    res.cookie("jwt", token, cookieOptions)
+    res.cookie("jwt", token, cookieOptions) // this sends the cookie as respond to client
     // console.log(cookieOptions);
+
+    user.password = undefined // we dont want to see the password on the client site
+    user.__v = undefined
 
 
     res.status(statusCode).json({
