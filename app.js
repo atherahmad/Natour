@@ -11,6 +11,7 @@ import rateLimit from "express-rate-limit"
 import helmet from "helmet"
 import mongoSanitize from "express-mongo-sanitize"
 import xss from "xss-clean"
+import hpp from "hpp"
 
 dotenv.config({ path: './config.env' });
 
@@ -50,14 +51,26 @@ app.use(mongoSanitize()) // it looks in req.body.query and filter out all "$" an
 //   "email": {"$gt": ""},
 //   "password": "ja%nine1990"
 // }
-
 // b) against XSS - HTML and js script input
 app.use(xss())
 
-// 6) Serving static files
+// 6) hpp - Prevent Parameter Pollution // {{URL}}api/v1/tours?sort=duration&sort=price - here we got duplication of sort which will create an Array sort = ["duration", "price"], which we cannot split in our APIFeatures.js
+// we can pass in an object with property whitelist, which is an array of the fields where we allow multiple queries for "duration" --> {{URL}}api/v1/tours?duration=5&duration=9
+app.use(hpp({ 
+  whitelist: [
+    "duration",
+    "ratingsQuantity",
+    "ratingsAverage",
+    "maxGroupSize",
+    "difficulty",
+    "price"
+  ]
+}))
+
+// 7) Serving static files
 app.use(express.static(`${__dirname}/public`)); // when we type now in our browser 127.0.0.1:3000/overview.html we can see our html file displayed in te browser. We can do that with all our static files
 
-// 7) Test middleware
+// 8) Test middleware
 // request time for every request added to the request object as a key.
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
