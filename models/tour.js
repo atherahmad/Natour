@@ -112,6 +112,11 @@ const tourSchema = mongoose.Schema({
         ref: "User"
       }
     ]
+    // this would be child referencing what we dont want. Cause the array of reviews can grow uncontrollable.
+    // reviews: [
+    //   {type: mongoose.Schema.ObjectId,
+    //   ref: "Review"}
+    // ]
   },
   {
     toJSON: {virtuals: true},
@@ -122,6 +127,14 @@ const tourSchema = mongoose.Schema({
 // defining virtual properties which are not stored in the Database.
 tourSchema.virtual("durationWeeks").get(function() {
   return this.duration / 7 
+})
+
+// VIRTUAL POPULATE
+// We are implementing child referencing with creating virtual fields. Thats how we not store the Array of reviews in out DB,but still have the connection to it.
+tourSchema.virtual("reviews", {
+  ref: "Review",
+  foreignField: "tour", // "tour" is the field in Review model where we implemented the Parent Referencing to the Tour model
+  localField: "_id" // "_id" is called "tour" in the Review model. Thats how we build the connection between Review and Tour
 })
 
 // Mongoose Middleware (1.Document middleware, 2.Query middleware, 3.Aggregate middleware)
