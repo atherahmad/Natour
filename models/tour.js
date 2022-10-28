@@ -130,7 +130,7 @@ tourSchema.virtual("durationWeeks").get(function() {
 })
 
 // VIRTUAL POPULATE
-// We are implementing child referencing with creating virtual fields. Thats how we not store the Array of reviews in out DB,but still have the connection to it.
+// We are implementing a kind of child referencing with creating virtual fields. Thats how we not store the Array of reviews in out DB,but still have the connection to it.
 tourSchema.virtual("reviews", {
   ref: "Review",
   foreignField: "tour", // "tour" is the field in Review model where we implemented the Parent Referencing to the Tour model

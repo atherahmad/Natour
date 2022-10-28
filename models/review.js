@@ -35,9 +35,10 @@ const reviewSchema = mongoose.Schema({
 
 
 // middleware for manipulating query before find() executes.
+// we dont want to populate the tour in the reviews, thats why we delete it from "path: user tour". Now we will just see the id of the tour. But not the whole tour populated.
 reviewSchema.pre(/^find/, function(next) {
     this.populate({ // populate(fieldName) // we fill the field guide with the actual data instead of just showing the id of the users. we replace the id with the users data.
-      path: "tour user", // field we want to update
+      path: "user", // field we want to update
       select: "name photo" // which fields we want to exclude
     })
     next()
