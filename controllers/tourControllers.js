@@ -1,8 +1,8 @@
 import Tour from '../models/tour.js';
-import APIFeatures from '../utils/apiFeatures.js';
+// import APIFeatures from '../utils/apiFeatures.js';
 import AppError from '../utils/appError.js';
 import { catchAsync } from '../utils/catchAsync.js';
-import { factoryCreateOne, factoryDeleteOne, factoryGetOne, factoryUpdateOne } from "./handlerFactory.js"
+import { factoryCreateOne, factoryDeleteOne, factoryGetAll, factoryGetOne, factoryUpdateOne } from "./handlerFactory.js"
 
 // ALIASING : we can manipulate the req.query object before we will use it in getAllTours
 export const aliasTopTours = (req, res, next) => {
@@ -12,26 +12,27 @@ export const aliasTopTours = (req, res, next) => {
   next()
 }
 
-export const getAllTours = catchAsync(async (req, res, next) => {
-    console.log(req.query);
-    // EXECUTE QUERY: here we can just delete one of the methods if we dont want to apply them.
-    const features = new APIFeatures(Tour.find(), req.query)
-    .filter()
-    .sort()
-    .limitFields()
-    .paginate()
+export const getAllTours = factoryGetAll(Tour)
+// catchAsync(async (req, res, next) => {
+//     console.log(req.query);
+//     // EXECUTE QUERY: here we can just delete one of the methods if we dont want to apply them.
+//     const features = new APIFeatures(Tour.find(), req.query)
+//     .filter()
+//     .sort()
+//     .limitFields()
+//     .paginate()
 
-    const tours = await features.query
+//     const tours = await features.query
 
-    // SEND RESPONSE
-    res.status(200).json({
-      status: 'success',
-      results: tours.length, // just do this if you read an array with multiple objects inside.
-      data: {
-        tours
-      },
-    });
-});
+//     // SEND RESPONSE
+//     res.status(200).json({
+//       status: 'success',
+//       results: tours.length, // just do this if you read an array with multiple objects inside.
+//       data: {
+//         tours
+//       },
+//     });
+// });
 
 export const getTour = factoryGetOne(Tour, {path: "reviews"})
 // catchAsync(async (req, res, next) => {

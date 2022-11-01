@@ -1,24 +1,25 @@
 import Review from '../models/review.js';
-import AppError from '../utils/appError.js';
-import { catchAsync } from '../utils/catchAsync.js';
-import {factoryDeleteOne, factoryCreateOne, factoryUpdateOne, factoryGetOne }from "./handlerFactory.js"
+// import AppError from '../utils/appError.js';
+// import { catchAsync } from '../utils/catchAsync.js';
+import {factoryDeleteOne, factoryCreateOne, factoryUpdateOne, factoryGetOne, factoryGetAll }from "./handlerFactory.js"
 
 
-export const getAllReviews = catchAsync(async (req, res, next) => {
-  let filter = {} // we create a filter object which we pass in our find method, if we have a route with tourI in params. (create Review on tour/get reviews on tour)
-    if (req.params.tourId) filter = {tour: req.params.tourId}
-    // EXECUTE QUERY: here we can just delete one of the methods if we dont want to apply them.
-    const reviews = await Review.find(filter)
+export const getAllReviews = factoryGetAll(Review)
+// catchAsync(async (req, res, next) => {
+//   let filter = {} // we create a filter object which we pass in our find method, if we have a route with tourI in params. (create Review on tour/get reviews on tour)
+//     if (req.params.tourId) filter = {tour: req.params.tourId}
+//     // EXECUTE QUERY: here we can just delete one of the methods if we dont want to apply them.
+//     const reviews = await Review.find(filter)
 
-    // SEND RESPONSE
-    res.status(200).json({
-      status: 'success',
-      results: reviews.length, // just do this if you read an array with multiple objects inside.
-      data: {
-        reviews
-      },
-    });
-});
+//     // SEND RESPONSE
+//     res.status(200).json({
+//       status: 'success',
+//       results: reviews.length, // just do this if you read an array with multiple objects inside.
+//       data: {
+//         reviews
+//       },
+//     });
+// });
 
 export const getReview = factoryGetOne(Review)
 // catchAsync(async (req, res, next) => {

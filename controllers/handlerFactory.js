@@ -1,5 +1,6 @@
 import { catchAsync } from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
+import APIFeatures from "../utils/apiFeatures.js";
 
 
 export const factoryDeleteOne = Model => catchAsync(async (req, res, next) => {
@@ -69,5 +70,27 @@ export const factoryGetOne = (Model, popOptions) => catchAsync(async (req, res, 
     },
   });
 })
+
+
+export const factoryGetAll = (Model) => catchAsync(async (req, res, next) => {
+    // console.log(req.query);
+    // EXECUTE QUERY: here we can just delete one of the methods if we dont want to apply them.
+    const features = new APIFeatures(Model.find(), req.query)
+    .filter()
+    .sort()
+    .limitFields()
+    .paginate()
+
+    const doc = await features.query
+
+    // SEND RESPONSE
+    res.status(200).json({
+      status: 'success',
+      results: doc.length, // just do this if you read an array with multiple objects inside.
+      data: {
+        data: doc
+      },
+    });
+});
 
 

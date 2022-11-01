@@ -1,7 +1,7 @@
 import User from "../models/user.js";
 import { catchAsync } from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
-import {factoryCreateOne, factoryDeleteOne, factoryGetOne, factoryUpdateOne} from "./handlerFactory.js"
+import {factoryCreateOne, factoryDeleteOne, factoryGetAll, factoryGetOne, factoryUpdateOne} from "./handlerFactory.js"
 
 // we use this function in our updateCurrentUserData function
 const filterObj = (obj, ...allowedFields) => { // ...allowedFields = ["name", "email"] ; obj = req.body
@@ -14,16 +14,17 @@ const filterObj = (obj, ...allowedFields) => { // ...allowedFields = ["name", "e
   return newObj
 }
 
-export const getAllUsers =catchAsync(async (req, res, next) => {
-    const users = await User.find()
-    res.status(200).json({
-      status: 'success',
-      results: users.length,
-      data: {
-        users
-      },
-    });
-});
+export const getAllUsers = factoryGetAll(User)
+// catchAsync(async (req, res, next) => {
+//     const users = await User.find()
+//     res.status(200).json({
+//       status: 'success',
+//       results: users.length,
+//       data: {
+//         users
+//       },
+//     });
+// });
 
 export const updateCurrentUserData = catchAsync(async (req, res, next) => {
   // 1) Create error if user POSTs password data
@@ -76,17 +77,20 @@ export const getUser = factoryGetOne(User)
 //   });
 // });
 
-export const createUser = factoryCreateOne(User)
+export const createUser = (req, res) => {
+  res.status(500).json({
+          status: 'error',
+          message: "this route is not defined! Please use /signup instead"
+        })
+}
 // catchAsync(async (req, res, next) => {
 //     const newUser = await User.create(req.body) // this is shorthand for belows code
 //     // const user = req.body
 //     // const newUser = new User(user)
 //     // await newUser.save()
 //     res.status(201).json({
-//       status: 'success',
-//       data: {
-//         user: newUser
-//     },
+//       status: 'error',
+//       message: "this route is not defined! Please use /signup instead"
 //     })
 // });
 
