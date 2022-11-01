@@ -1,7 +1,7 @@
 import User from "../models/user.js";
 import { catchAsync } from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
-import {factoryCreateOne, factoryDeleteOne, factoryUpdateOne} from "./handlerFactory.js"
+import {factoryCreateOne, factoryDeleteOne, factoryGetOne, factoryUpdateOne} from "./handlerFactory.js"
 
 // we use this function in our updateCurrentUserData function
 const filterObj = (obj, ...allowedFields) => { // ...allowedFields = ["name", "email"] ; obj = req.body
@@ -62,18 +62,19 @@ export const deleteCurrentUser = catchAsync(async(req, res, next) => {
   })
 })
 
-export const getUser = catchAsync(async (req, res, next) => {
-    const user = await User.findById(req.params.id) // shorthand for belows code
-    // User.findOne({ _id: req.params.id}) ---> this works the same like above
+export const getUser = factoryGetOne(User)
+// catchAsync(async (req, res, next) => {
+//     const user = await User.findById(req.params.id) // shorthand for belows code
+//     // User.findOne({ _id: req.params.id}) ---> this works the same like above
 
-  // we read this object with the fitting id to the client.
-    res.status(200).json({
-    status: 'success',
-    data: {
-      user
-    },
-  });
-});
+//   // we read this object with the fitting id to the client.
+//     res.status(200).json({
+//     status: 'success',
+//     data: {
+//       user
+//     },
+//   });
+// });
 
 export const createUser = factoryCreateOne(User)
 // catchAsync(async (req, res, next) => {
@@ -89,6 +90,7 @@ export const createUser = factoryCreateOne(User)
 //     })
 // });
 
+// Do NOT update passwords with this!
 export const updateUser = factoryUpdateOne(User)
 // catchAsync(async (req, res, next) => {
 //     const user = await User.findByIdAndUpdate(req.params.id, req.body, {

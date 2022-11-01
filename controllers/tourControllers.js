@@ -2,7 +2,7 @@ import Tour from '../models/tour.js';
 import APIFeatures from '../utils/apiFeatures.js';
 import AppError from '../utils/appError.js';
 import { catchAsync } from '../utils/catchAsync.js';
-import { factoryCreateOne, factoryDeleteOne, factoryUpdateOne } from "./handlerFactory.js"
+import { factoryCreateOne, factoryDeleteOne, factoryGetOne, factoryUpdateOne } from "./handlerFactory.js"
 
 // ALIASING : we can manipulate the req.query object before we will use it in getAllTours
 export const aliasTopTours = (req, res, next) => {
@@ -33,23 +33,24 @@ export const getAllTours = catchAsync(async (req, res, next) => {
     });
 });
 
-export const getTour = catchAsync(async (req, res, next) => {
-    // const id = req.params.id * 1; // this is a trick which converts automatically a string to a number, when it gets multiplied with a number.
-  // const tour = tours.filter((item) => item.id === id); // filters the object with the fitting id property from the array and returns it.
-    const tour = await Tour.findById(req.params.id).populate("reviews")
+export const getTour = factoryGetOne(Tour, {path: "reviews"})
+// catchAsync(async (req, res, next) => {
+//     // const id = req.params.id * 1; // this is a trick which converts automatically a string to a number, when it gets multiplied with a number.
+//   // const tour = tours.filter((item) => item.id === id); // filters the object with the fitting id property from the array and returns it.
+//     const tour = await Tour.findById(req.params.id).populate("reviews")
    
-    if (!tour) { // if tour is false. means tour value "null" is not a truthy value. --> false
-      return next(new AppError("No tour found with that ID", 404)) // we need return, because we want to end the circle and not res.status(responding) the tour with false ID to the client. (user)
-    }
+//     if (!tour) { // if tour is false. means tour value "null" is not a truthy value. --> false
+//       return next(new AppError("No tour found with that ID", 404)) // we need return, because we want to end the circle and not res.status(responding) the tour with false ID to the client. (user)
+//     }
 
-  // we read this object with the fitting id to the client.
-    res.status(200).json({
-    status: 'success',
-    data: {
-      tour
-    },
-  });
-})
+//   // we read this object with the fitting id to the client.
+//     res.status(200).json({
+//     status: 'success',
+//     data: {
+//       tour
+//     },
+//   });
+// })
 
 // // CATCHING ERRORS IN ASYNC FUNCTIONS: --> we import it from "./utils/catchAsync.js"
 // const catchAsync = fn => {

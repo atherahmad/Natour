@@ -24,7 +24,7 @@ export const factoryCreateOne = Model => catchAsync(async (req, res, next) => {
     res.status(201).json({
       status: 'success',
       data: {
-        doc: newDoc
+        data: newDoc
     },
     })
 }) 
@@ -42,9 +42,32 @@ export const factoryUpdateOne = Model => catchAsync(async (req, res, next) => {
     res.status(200).json({
       status: 'success',
       data: {
-        doc: doc
+        data: doc
       },
     });
 });
+
+// here its different because we got a "populate" inside our getTour middleware in our tourController.js. We solve this by passing as second argument an object with populate options.
+export const factoryGetOne = (Model, popOptions) => catchAsync(async (req, res, next) => {
+    // const id = req.params.id * 1; // this is a trick which converts automatically a string to a number, when it gets multiplied with a number.
+  // const tour = tours.filter((item) => item.id === id); // filters the object with the fitting id property from the array and returns it.
+
+    //   const doc = await Model.findById(req.params.id).populate("reviews")
+    let query = Model.findById(req.params.id) 
+    if (popOptions) query = query.populate(popOptions)
+    const doc = await query
+  
+    if (!doc) { // if tour is false. means tour value "null" is not a truthy value. --> false
+      return next(new AppError("No document found with that ID", 404)) // we need return, because we want to end the circle and not res.status(responding) the tour with false ID to the client. (user)
+    }
+
+  // we read this object with the fitting id to the client.
+    res.status(200).json({
+    status: 'success',
+    data: {
+      data: doc
+    },
+  });
+})
 
 

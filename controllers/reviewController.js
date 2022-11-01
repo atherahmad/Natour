@@ -1,7 +1,7 @@
 import Review from '../models/review.js';
 import AppError from '../utils/appError.js';
 import { catchAsync } from '../utils/catchAsync.js';
-import {factoryDeleteOne, factoryCreateOne, factoryUpdateOne }from "./handlerFactory.js"
+import {factoryDeleteOne, factoryCreateOne, factoryUpdateOne, factoryGetOne }from "./handlerFactory.js"
 
 
 export const getAllReviews = catchAsync(async (req, res, next) => {
@@ -20,22 +20,28 @@ export const getAllReviews = catchAsync(async (req, res, next) => {
     });
 });
 
-export const getReview = catchAsync(async (req, res, next) => {
-    const review = await Review.findById(req.params.id)
+export const getReview = factoryGetOne(Review)
+// catchAsync(async (req, res, next) => {
+//     const review = await Review.findById(req.params.id)
    
-    if (!review) {
-      return next(new AppError("No tour found with that ID", 404))
-    }
+//     if (!review) {
+//       return next(new AppError("No tour found with that ID", 404))
+//     }
 
-  // we read this object with the fitting id to the client.
-    res.status(200).json({
-    status: 'success',
-    data: {
-      review
-    },
-  });
-})
+//   // we read this object with the fitting id to the client.
+//     res.status(200).json({
+//     status: 'success',
+//     data: {
+//       review
+//     },
+//   });
+// })
 
+export const setTourAndUserIds = (req, res, next) => {
+  if (!req.body.tour) req.body.tour = req.params.tourId // we automatically fill the field inside review model with the current req.params.tourId
+  if (!req.body.user) req.body.user = req.user.id
+  next()
+}
 
 export const createReview = factoryCreateOne(Review)
 // catchAsync(async (req, res, next) => {
