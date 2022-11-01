@@ -1,6 +1,7 @@
 import express from "express";
 import { getAllUsers, getUser, createUser, updateUser, deleteUser, updateCurrentUserData, deleteCurrentUser } from "../controllers/userControllers.js";
-import { signup, login, forgotPassword, resetPassword, protect, updatePassword } from "../controllers/authController.js";
+import { signup, login, forgotPassword, resetPassword, protect, updatePassword, restrictTo } from "../controllers/authController.js";
+
 
 
 
@@ -51,5 +52,7 @@ router
 .get(getUser)
 .patch(updateUser)
 .delete(deleteUser)
+
+
 
 export default router

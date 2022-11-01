@@ -39,7 +39,7 @@ const reviewSchema = mongoose.Schema({
 reviewSchema.pre(/^find/, function(next) {
     this.populate({ // populate(fieldName) // we fill the field guide with the actual data instead of just showing the id of the users. we replace the id with the users data.
       path: "user", // field we want to update
-      select: "name photo" // which fields we want to exclude
+      select: "name photo" // which fields we want to include
     })
     next()
   })
@@ -48,3 +48,7 @@ reviewSchema.pre(/^find/, function(next) {
 const Review = mongoose.model("Review",reviewSchema)
 
 export default Review
+
+// POST /tour/234fsa/reviews => nested route
+// GET /tour/234fsa/reviews
+// POST /tour/234fsa/reviews/9784cdcdc

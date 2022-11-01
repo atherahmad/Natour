@@ -1,6 +1,7 @@
 import User from "../models/user.js";
 import { catchAsync } from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
+import {factoryCreateOne, factoryDeleteOne, factoryUpdateOne} from "./handlerFactory.js"
 
 // we use this function in our updateCurrentUserData function
 const filterObj = (obj, ...allowedFields) => { // ...allowedFields = ["name", "email"] ; obj = req.body
@@ -17,6 +18,7 @@ export const getAllUsers =catchAsync(async (req, res, next) => {
     const users = await User.find()
     res.status(200).json({
       status: 'success',
+      results: users.length,
       data: {
         users
       },
@@ -73,37 +75,40 @@ export const getUser = catchAsync(async (req, res, next) => {
   });
 });
 
-export const createUser = catchAsync(async (req, res, next) => {
-    const newUser = await User.create(req.body) // this is shorthand for belows code
-    // const user = req.body
-    // const newUser = new User(user)
-    // await newUser.save()
-    res.status(201).json({
-      status: 'success',
-      data: {
-        user: newUser
-    },
-    })
-});
+export const createUser = factoryCreateOne(User)
+// catchAsync(async (req, res, next) => {
+//     const newUser = await User.create(req.body) // this is shorthand for belows code
+//     // const user = req.body
+//     // const newUser = new User(user)
+//     // await newUser.save()
+//     res.status(201).json({
+//       status: 'success',
+//       data: {
+//         user: newUser
+//     },
+//     })
+// });
 
-export const updateUser = catchAsync(async (req, res, next) => {
-    const user = await User.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true
-    })
-    res.status(200).json({
-      status: 'success',
-      data: {
-        user: user
-      },
-    });
-});
+export const updateUser = factoryUpdateOne(User)
+// catchAsync(async (req, res, next) => {
+//     const user = await User.findByIdAndUpdate(req.params.id, req.body, {
+//       new: true,
+//       runValidators: true
+//     })
+//     res.status(200).json({
+//       status: 'success',
+//       data: {
+//         user: user
+//       },
+//     });
+// });
 
-export const deleteUser = catchAsync(async (req, res, next) => {
-    await User.findByIdAndDelete(req.params.id)
-    res.status(204).json({
-      // statuscode 204 = no content
-      status: 'success',
-      data: null,
-    });
-});
+export const deleteUser = factoryDeleteOne(User)
+// catchAsync(async (req, res, next) => {
+//     await User.findByIdAndDelete(req.params.id)
+//     res.status(204).json({
+//       // statuscode 204 = no content
+//       status: 'success',
+//       data: null,
+//     });
+// });

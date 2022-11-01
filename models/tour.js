@@ -106,7 +106,7 @@ const tourSchema = mongoose.Schema({
       }
     ],
     // guides: Array - (embedded)
-    guides: [ // this is referencing. Output wont be the whole user with the id. It will be just an array of id´s
+    guides: [ // this is Parent referencing. Output wont be the whole user with the id. It will be just an array of id´s
       {
         type: mongoose.Schema.ObjectId,
         ref: "User"
@@ -130,7 +130,7 @@ tourSchema.virtual("durationWeeks").get(function() {
 })
 
 // VIRTUAL POPULATE
-// We are implementing a kind of child referencing with creating virtual fields. Thats how we not store the Array of reviews in out DB,but still have the connection to it.
+// We are implementing a kind of child referencing with creating virtual fields. Thats how we not store the Array of reviews in our DB,but still have the connection to it.
 tourSchema.virtual("reviews", {
   ref: "Review",
   foreignField: "tour", // "tour" is the field in Review model where we implemented the Parent Referencing to the Tour model

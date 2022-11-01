@@ -3,7 +3,7 @@ import { getAllReviews, createReview, getReview, updateReview, deleteReview } fr
 
 import { protect, restrictTo } from "../controllers/authController.js"
 
-const router = express.Router()
+const router = express.Router({mergeParams: true})
 
 router
 .route("/")

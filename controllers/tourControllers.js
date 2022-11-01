@@ -2,6 +2,7 @@ import Tour from '../models/tour.js';
 import APIFeatures from '../utils/apiFeatures.js';
 import AppError from '../utils/appError.js';
 import { catchAsync } from '../utils/catchAsync.js';
+import { factoryCreateOne, factoryDeleteOne, factoryUpdateOne } from "./handlerFactory.js"
 
 // ALIASING : we can manipulate the req.query object before we will use it in getAllTours
 export const aliasTopTours = (req, res, next) => {
@@ -57,50 +58,54 @@ export const getTour = catchAsync(async (req, res, next) => {
 //   }
 // }
 
-export const createTour = catchAsync(async (req, res, next) => {
-    const newTour = await Tour.create(req.body) // this is shorthand for belows code
-    // const tour = req.body
-    // const newTour = new Tour(tour)
-    // await newTour.save()
-    res.status(201).json({
-      status: 'success',
-      data: {
-        tour: newTour
-    },
-    })
-}) 
+export const createTour = factoryCreateOne(Tour)
+// catchAsync(async (req, res, next) => {
+//     const newTour = await Tour.create(req.body) // this is shorthand for belows code
+//     // const tour = req.body
+//     // const newTour = new Tour(tour)
+//     // await newTour.save()
+//     res.status(201).json({
+//       status: 'success',
+//       data: {
+//         tour: newTour
+//     },
+//     })
+// }) 
 
-export const updateTour = catchAsync(async (req, res, next) => {
-    const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true
-    })
+export const updateTour = factoryUpdateOne(Tour)
+// catchAsync(async (req, res, next) => {
+//     const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+//       new: true,
+//       runValidators: true
+//     })
 
-    if (!tour) { // if tour is false. means tour value "null" is not a truthy value. --> false
-      return next(new AppError("No tour found with that ID", 404)) // we need return, because we want to end the circle and not udating th tour with wrong ID given by user
-    }
+//     if (!tour) { // if tour is false. means tour value "null" is not a truthy value. --> false
+//       return next(new AppError("No tour found with that ID", 404)) // we need return, because we want to end the circle and not udating th tour with wrong ID given by user
+//     }
 
-    res.status(200).json({
-      status: 'success',
-      data: {
-        tour: tour
-      },
-    });
-});
+//     res.status(200).json({
+//       status: 'success',
+//       data: {
+//         tour: tour
+//       },
+//     });
+// });
 
-export const deleteTour = catchAsync(async (req, res, next) => {
-    const tour = await Tour.findByIdAndDelete(req.params.id)
 
-    if (!tour) { // if tour is false. means tour value "null" is not a truthy value. --> false
-      return next(new AppError("No tour found with that ID", 404)) // we need return, because we want to end the circle and not res.status(responding) the tour with false ID to the client. (user)
-    }
+export const deleteTour = factoryDeleteOne(Tour) // we created a factory for deleting documents in a model. We can apply that into every controller, where we want to delete something.
+// export const deleteTour = catchAsync(async (req, res, next) => {
+//     const tour = await Tour.findByIdAndDelete(req.params.id)
 
-    res.status(204).json({
-      // statuscode 204 = no content
-      status: 'success',
-      data: null,
-    });
-});
+//     if (!tour) { // if tour is false. means tour value "null" is not a truthy value. --> false
+//       return next(new AppError("No tour found with that ID", 404)) // we need return, because we want to end the circle and not res.status(responding) the tour with false ID to the client. (user)
+//     }
+
+//     res.status(204).json({
+//       // statuscode 204 = no content
+//       status: 'success',
+//       data: null,
+//     });
+// });
 
 // AGGREGATION PIPELINE: (using aggregation operators like $match, $group, etc)
 export const getTourStats = catchAsync(async (req, res, next) => {
