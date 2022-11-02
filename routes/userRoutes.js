@@ -1,5 +1,5 @@
 import express from "express";
-import { getAllUsers, getUser, createUser, updateUser, deleteUser, updateCurrentUserData, deleteCurrentUser } from "../controllers/userControllers.js";
+import { getAllUsers, getUser, createUser, updateUser, deleteUser, updateCurrentUserData, deleteCurrentUser, getMe } from "../controllers/userControllers.js";
 import { signup, login, forgotPassword, resetPassword, protect, updatePassword, restrictTo } from "../controllers/authController.js";
 
 
@@ -7,7 +7,7 @@ import { signup, login, forgotPassword, resetPassword, protect, updatePassword, 
 
 const router = express.Router()
 
-// authentification route- (signUp)
+// authentication route- (signUp)
 router
 .route("/signup")
 .post(signup)
@@ -31,6 +31,11 @@ router
 router
 .route("/updateMyPassword")
 .patch(protect, updatePassword)
+
+// /me route
+router
+.route("/me")
+.get(protect, getMe, getUser)
 
 // update current user data
 router

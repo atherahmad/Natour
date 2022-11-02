@@ -4,6 +4,15 @@ import Review from '../models/review.js';
 import {factoryDeleteOne, factoryCreateOne, factoryUpdateOne, factoryGetOne, factoryGetAll }from "./handlerFactory.js"
 
 
+
+export const setTourAndUserIds = (req, res, next) => {
+  if (!req.body.tour) req.body.tour = req.params.tourId // we automatically fill the field inside review model with the current req.params.tourId
+  if (!req.body.user) req.body.user = req.user.id
+  next()
+}
+
+
+// Controllers with factory functions:
 export const getAllReviews = factoryGetAll(Review)
 // catchAsync(async (req, res, next) => {
 //   let filter = {} // we create a filter object which we pass in our find method, if we have a route with tourI in params. (create Review on tour/get reviews on tour)
@@ -37,12 +46,6 @@ export const getReview = factoryGetOne(Review)
 //     },
 //   });
 // })
-
-export const setTourAndUserIds = (req, res, next) => {
-  if (!req.body.tour) req.body.tour = req.params.tourId // we automatically fill the field inside review model with the current req.params.tourId
-  if (!req.body.user) req.body.user = req.user.id
-  next()
-}
 
 export const createReview = factoryCreateOne(Review)
 // catchAsync(async (req, res, next) => {

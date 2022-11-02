@@ -1,7 +1,7 @@
 import User from "../models/user.js";
 import { catchAsync } from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
-import {factoryCreateOne, factoryDeleteOne, factoryGetAll, factoryGetOne, factoryUpdateOne} from "./handlerFactory.js"
+import {factoryDeleteOne, factoryGetAll, factoryGetOne, factoryUpdateOne} from "./handlerFactory.js"
 
 // we use this function in our updateCurrentUserData function
 const filterObj = (obj, ...allowedFields) => { // ...allowedFields = ["name", "email"] ; obj = req.body
@@ -14,17 +14,12 @@ const filterObj = (obj, ...allowedFields) => { // ...allowedFields = ["name", "e
   return newObj
 }
 
-export const getAllUsers = factoryGetAll(User)
-// catchAsync(async (req, res, next) => {
-//     const users = await User.find()
-//     res.status(200).json({
-//       status: 'success',
-//       results: users.length,
-//       data: {
-//         users
-//       },
-//     });
-// });
+// thats a little middleware to replace the req.params.id with the req.user.id. To get the current User when hes logged in.
+export const getMe = (req, res, next) => {
+  req.params.id = req.user.id
+  next()
+}
+
 
 export const updateCurrentUserData = catchAsync(async (req, res, next) => {
   // 1) Create error if user POSTs password data
@@ -63,6 +58,27 @@ export const deleteCurrentUser = catchAsync(async(req, res, next) => {
   })
 })
 
+export const createUser = (req, res) => {
+  res.status(500).json({
+          status: 'error',
+          message: "this route is not defined! Please use /signup instead"
+        })
+}
+
+
+// Controllers with factory functions:
+export const getAllUsers = factoryGetAll(User)
+// catchAsync(async (req, res, next) => {
+//     const users = await User.find()
+//     res.status(200).json({
+//       status: 'success',
+//       results: users.length,
+//       data: {
+//         users
+//       },
+//     });
+// });
+
 export const getUser = factoryGetOne(User)
 // catchAsync(async (req, res, next) => {
 //     const user = await User.findById(req.params.id) // shorthand for belows code
@@ -77,22 +93,6 @@ export const getUser = factoryGetOne(User)
 //   });
 // });
 
-export const createUser = (req, res) => {
-  res.status(500).json({
-          status: 'error',
-          message: "this route is not defined! Please use /signup instead"
-        })
-}
-// catchAsync(async (req, res, next) => {
-//     const newUser = await User.create(req.body) // this is shorthand for belows code
-//     // const user = req.body
-//     // const newUser = new User(user)
-//     // await newUser.save()
-//     res.status(201).json({
-//       status: 'error',
-//       message: "this route is not defined! Please use /signup instead"
-//     })
-// });
 
 // Do NOT update passwords with this!
 export const updateUser = factoryUpdateOne(User)

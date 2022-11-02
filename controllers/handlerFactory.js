@@ -73,9 +73,13 @@ export const factoryGetOne = (Model, popOptions) => catchAsync(async (req, res, 
 
 
 export const factoryGetAll = (Model) => catchAsync(async (req, res, next) => {
+    // we need this here to allow nested GET reviews on tour! (hack)
+    let filter = {} // we create a filter object which we pass in our find method, if we have a route with tourI in params. (create Review on tour/get reviews on tour)
+    if (req.params.tourId) filter = {tour: req.params.tourId}
+
     // console.log(req.query);
     // EXECUTE QUERY: here we can just delete one of the methods if we dont want to apply them.
-    const features = new APIFeatures(Model.find(), req.query)
+    const features = new APIFeatures(Model.find(filter), req.query)
     .filter()
     .sort()
     .limitFields()
