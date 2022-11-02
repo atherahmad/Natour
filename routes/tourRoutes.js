@@ -22,17 +22,17 @@ router
 
 router
 .route("/monthly-plan/:year")
-.get(getMonthlyPlan)
+.get(restrictTo("admin", "lead-guide", "guide"), getMonthlyPlan)
 
 router
 .route("/")
-.get(protect, getAllTours) // protect is for protecting the route with authentication by the JWT
+.get(restrictTo("admin", "lead-guide"), getAllTours) // protect is for protecting the route with authentication by the JWT
 .post(createTour)
 
 router
 .route("/:id")
 .get(getTour)
-.patch(updateTour)
+.patch(protect, restrictTo("admin", "lead-guide"), updateTour)
 .delete(protect, restrictTo("admin", "lead-guide"), deleteTour)
 
 
