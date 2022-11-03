@@ -26,8 +26,8 @@ router
 
 router
 .route("/")
-.get(restrictTo("admin", "lead-guide"), getAllTours) // protect is for protecting the route with authentication by the JWT
-.post(createTour)
+.get(getAllTours) // protect is for protecting the route with authentication by the JWT
+.post(protect, restrictTo("admin", "lead-guide"), createTour)
 
 router
 .route("/:id")

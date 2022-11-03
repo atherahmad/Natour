@@ -72,7 +72,7 @@ export const factoryGetOne = (Model, popOptions) => catchAsync(async (req, res, 
 })
 
 
-export const factoryGetAll = (Model) => catchAsync(async (req, res, next) => {
+export const factoryGetAll = Model => catchAsync(async (req, res, next) => {
     // we need this here to allow nested GET reviews on tour! (hack)
     let filter = {} // we create a filter object which we pass in our find method, if we have a route with tourI in params. (create Review on tour/get reviews on tour)
     if (req.params.tourId) filter = {tour: req.params.tourId}
@@ -85,6 +85,7 @@ export const factoryGetAll = (Model) => catchAsync(async (req, res, next) => {
     .limitFields()
     .paginate()
 
+    // const doc = await features.query.explain() // .explain() shows more infos about the query
     const doc = await features.query
 
     // SEND RESPONSE

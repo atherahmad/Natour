@@ -124,6 +124,9 @@ const tourSchema = mongoose.Schema({
   }
 )
 
+// tourSchema.index({price: 1}) // 1 stands for ascending order -1 for descending order. This helps our reading performance and our application has a better performance. for fields like name or id, mongoose is creating an index on default. You can see it in compass (index). You put Indexes on fields, where you think the most users will query for. Your application doesnt have to read all the data because of the descending/ascending order from the index.
+tourSchema.index({price: 1, ratingsAverage: -1})
+tourSchema.index({slug: 1})
 // defining virtual properties which are not stored in the Database.
 tourSchema.virtual("durationWeeks").get(function() {
   return this.duration / 7 
