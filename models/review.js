@@ -34,6 +34,9 @@ const reviewSchema = mongoose.Schema({
 }
 )
 
+// a user can write a review for a specific tour just once:
+reviewSchema.index({tour: 1, user: 1}, {unique: true}) // this means each combination of user and tour field in a review, must be unique!
+
 
 // middleware for manipulating query before find() executes.
 // we dont want to populate the tour in the reviews, thats why we delete it from "path: user tour". Now we will just see the id of the tour. But not the whole tour populated.
