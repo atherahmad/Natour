@@ -1,6 +1,6 @@
 import Tour from '../models/tour.js';
 // import APIFeatures from '../utils/apiFeatures.js';
-// import AppError from '../utils/appError.js';
+import AppError from '../utils/appError.js';
 import { catchAsync } from '../utils/catchAsync.js';
 import { factoryCreateOne, factoryDeleteOne, factoryGetAll, factoryGetOne, factoryUpdateOne } from "./handlerFactory.js"
 
@@ -192,3 +192,33 @@ export const deleteTour = factoryDeleteOne(Tour) // we created a factory for del
 //       data: null,
 //     });
 // });
+
+
+
+// "/tours-within/:distance/center/:latlng/unit/:unit" 
+// "tours-distance/233/center/34.121403,-118.123376/unit/mi"
+export const getTourWithin = catchAsync(async(req, res, next) => {
+  const {distance, latlng, unit} = req.params
+  const [lat, lng] = latlng.split(",") // we split our string and save the strings wth destructering in lat and lng variables. (34.121403,-118.123376)
+
+  const radius = unit === "mi" ? distance / 3963.2 : distance / 6378.1 // mongoDB is assuming we give the radius of the sphere in radiants. 3963.2 is the radius of he earth in miles. in km its 6378.1
+
+  if (!lat || !lng) {
+    next(new AppError("Please provide latitude and longitude n the format lat,lng.", 400))
+  }
+
+  const tours = await Tour.find({
+    startLocation: {$geoWithin: {$centerSphere: [[lng, lat], radius]}} // "$geoWithin" is a geospatial Operator. We need an index for our startLocation in our Tour Model
+  }) 
+
+
+  console.log(distance, lat, lng, unit);
+
+  res.status(200).json({
+    status: "success",
+    results: tours.length,
+    data: {
+      data: tours
+    }
+  })
+})
