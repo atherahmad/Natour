@@ -222,3 +222,40 @@ export const getTourWithin = catchAsync(async(req, res, next) => {
     }
   })
 })
+
+export const getDistances = catchAsync(async(req, res, next) => {
+  const {latlng, unit} = req.params
+  const [lat, lng] = latlng.split(",") 
+
+  const multiplier = unit === "mi" ? 0.000621371 : 0.001 // converting meters to miles or km (distances)
+
+  if (!lat || !lng) {
+    next(new AppError("Please provide latitude and longitude n the format lat,lng.", 400))
+  }
+
+  const distances = await Tour.aggregate([ // we pass in an array with all the stages we want to define in our aggregation pipeline. The ONLY existing geospatial aggregation pipeline stage which exists is "$geoNear" !!! It needs to be the first stage! It requires that at least one of her fields contain a geospatial index (our "startLocation" field --> "2dsphere"). geoNear operator will automatically use that index for calculation.
+    {
+      $geoNear: { // geoNear oprator is calculating the distance from a starting point to another point. We store the calculated distance in the distanceField which we create in our aggregation pipeline.
+        near: {
+          type: "Point",
+          coordinates: [lng *1, lat * 1] // * 1 to convert to numbers
+        },
+        distanceField: "distance", // this is the field which gets created, where all the calculated distances will be stored
+        distanceMultiplier: multiplier  // this number gets multiplied with all the calculated distances. * 0.001 means converting meters to km
+      }
+    },
+    {
+      $project: { // Projection stage --> we just want to see our fields "distance and name"
+        distance: 1,
+        name: 1
+      }
+    }
+])
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      data: distances
+    }
+  })
+})

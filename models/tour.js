@@ -183,12 +183,12 @@ tourSchema.post(/^find/, function(docs, next) {
   next()
 })
 
-// AGGREGATION MIDDLEWARE -  "this" points to the current aggregation-object
-tourSchema.pre("aggregate", function(next) {
-  this.pipeline().unshift({$match: {secretTour: {$ne: true}}}) // unshift is adding an element at the beginning of an array. We add another stage (condition)'$match': { secretTour: [Object] } to our aggregate-object which you can see in console.log(this.pipeline).  {$match: {secretTour: {$ne: true}}} removes all the documents where secretTour is set to "true". This means it excludes our secretTour in our aggregation pipeline.
-  console.log(this.pipeline());
-  next()
-})
+// AGGREGATION MIDDLEWARE -  "this" points to the current aggregation-object -  We get rid of this middleware because our "$geoNear" has to be he first stage in aggregation pipeline!
+// tourSchema.pre("aggregate", function(next) {
+//   this.pipeline().unshift({$match: {secretTour: {$ne: true}}}) // unshift is adding an element at the beginning of an array. We add another stage (condition)'$match': { secretTour: [Object] } to our aggregate-object which you can see in console.log(this.pipeline).  {$match: {secretTour: {$ne: true}}} removes all the documents where secretTour is set to "true". This means it excludes our secretTour in our aggregation pipeline.
+//   console.log(this.pipeline());
+//   next()
+// })
 
 // creating a Model out of it: Model variables always wih capital Letter.
 const Tour = mongoose.model("Tour",tourSchema)
