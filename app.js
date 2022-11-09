@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import tourRouter from './routes/tourRoutes.js';
 import userRouter from './routes/userRoutes.js';
 import reviewRouter from "./routes/reviewRoutes.js"
+import viewRouter from "./routes/viewRoutes.js"
 import AppError from "./utils/appError.js"
 import {globalErrorHandler} from "./controllers/errorController.js"
 import rateLimit from "express-rate-limit"
@@ -88,30 +89,9 @@ app.use((req, res, next) => {
 });
 
 // ROUTES:
-// Views route - for rendering our frontend (pug file)
-app.get("/", (req, res) => {
-  res.status(200).render("base", {
-    tour: "The Forest Hiker", // the variables which we declare here as properties "tour" and "user" will be available in the pug file as "locals"
-    user: "Jonas"
-  }) // render will render the template, that we pass in as parameter to the client. (base.pug)
-})
-
-// Views route for rendering overview page with all tours
-// overview.pug extends the base --> it includes the base, thats why we can render just overview.pug or tour.pug and still rendering base with it. 
-app.get("/overview", (req, res) => {
-  res.status(200).render("overview", { // we render the overview.pug on route /overview and create local pug variable "title"
-    title: "All Tours"
-  })
-})
-
-// Views route for rendering overview page for a specific tour
-app.get("/tour", (req, res) => {
-  res.status(200).render("tour", { // we render the overview.pug on route /overview and create local pug variable "title"
-    title: "The Forest Hiker Tour"
-  })
-})
 
 // API routes
+app.use('/', viewRouter) // for rendering pug templates to the client
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use("/api/v1/reviews", reviewRouter);

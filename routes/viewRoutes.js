@@ -1,0 +1,16 @@
+import express from "express";
+import { getOverview, getTour } from "../controllers/viewsController.js";
+
+
+const router = express.Router()
+  
+  // Views route for rendering overview page with all tours
+  // overview.pug extends the base --> it includes the base, thats why we can render just overview.pug or tour.pug and still rendering base with it. 
+router.get("/", getOverview)
+  
+  // Views route for rendering overview page for a specific tour
+router.get("/tour", getTour)
+
+
+
+export default router

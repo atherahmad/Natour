@@ -148,7 +148,7 @@ tourSchema.virtual("reviews", {
 // "save" is called "hook" and the whole middleware is called "pre save hook"
 tourSchema.pre("save", function(next) {
   // console.log(this);
-  this.slug = slugify(this.name, {lower: true}) // slug creates a string based of the current processed documents "name" field
+  this.slug = slugify(this.name, {lower: true}) // slug creates a string based of the current processed documents "name" field. We use this in our pug template "overview.pug" for rendering a tour page for specific tour. The slug is integrated in our route ==> a.btn.btn--green.btn--small(href=`/tours/${item.slug}`) Details. Looks in url like ==> http://127.0.0.1:3000/tours/the-sea-explorer
   next()
 })
 
