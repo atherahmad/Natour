@@ -86,14 +86,18 @@ reviewSchema.post("save", function() { // post middleware has no access to next(
 
 // findByIdAndUpdate
 // findByIdAndDelete
-reviewSchema.pre(/^findOneAnd/, async function(next) { // pre middleware has access to next()
-  this.r = await this.findOne() // we can execute the query, which will us the "review" document which we going to process. We create a property inside our this variable and store the review document inside
-  console.log(this.r);
-})
+// reviewSchema.pre(/^findOneAnd/, async function(next) { // pre middleware has access to next()
+//   this.r = await this.findOne() // we can execute the query, which will use the "review" document which we going to process. We create a property inside our this variable and store the review document inside
+//   console.log(this.r);
+// })
 
-reviewSchema.post(/^findOneAnd/, async function(next) { 
-  // await this.findOne() does NOT work here, query has already executed
-  await this.r.constructor.calcAverageRatings(this.r.tour) // "this.r.tour" is the tour id. "r"is the whole review document.
+// reviewSchema.post(/^findOneAnd/, async function(next) { 
+//   // await this.findOne() does NOT work here, query has already executed
+//   await this.r.constructor.calcAverageRatings(this.r.tour) // "this.r.tour" is the tour id. "r"is the whole review document.
+// })
+
+reviewSchema.post(/^findOneAnd/, async function(doc) {
+  await doc.constructor.calcAverageRatings(doc.tour)
 })
 
 // creating a Model out of it: Model variables always wih capital Letter.

@@ -100,7 +100,7 @@ export const protect = catchAsync(async(req, res, next) => {
 
     // 2) Validate the token - VERIFICATION
     const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET) // jwt.verify(tokenString, secret, callback) the callback runs as soon as the verification has completed. its an async function.
-    console.log(decoded); // we can see that te if in our DB is the same with the id of the user, who logged in with his JWT. In JWT is the _id saved in the payload.
+    console.log(decoded); // we can see that the id in our DB is the same with the id of the user, who logged in with his JWT. In JWT is the _id saved in the payload.
 
     // 3) Check if user still exists
     const currentUser = await User.findById(decoded.id) // it checks if the id, which was send with the token, is still existing in our DB.

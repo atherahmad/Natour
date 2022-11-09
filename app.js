@@ -14,24 +14,35 @@ import mongoSanitize from "express-mongo-sanitize"
 import xss from "xss-clean"
 import hpp from "hpp"
 
+
 dotenv.config({ path: './config.env' });
 
 const __dirname = path.resolve();
 
 const app = express();
 
-// GLOBAL MIDDLEWARES
+// DEFINE VIEW ENGINE (MVC architecture- 3 components: model, views, controller)
+// express automatically supports the most common engines like "pug". We need to install and import it
+// example in base.pug (h1 The Park Camper ==> transforms into: <h1>The Park Camper</h1> by pug engine)
+app.set("view engine", "pug")
+// in which folder the views are located in: BUILDING THE CONNECTION TO "views" folder.
+app.set("views", path.join(__dirname, "views")) // Thats the correct way to write, because of a common bug. We could also write but this is not save regarding the common bug: ("views", `${__dirname}/views`)
 
-// 1) Set security HTTP headers
+// GLOBAL MIDDLEWARES
+// 1) Serving static files
+// app.use(express.static(`${__dirname}/public`)); // when we type now in our browser 127.0.0.1:3000/overview.html we can see our html file displayed in the browser. We can do that with all our static files
+app.use(express.static(path.join(__dirname, "public")))
+
+// 2) Set security HTTP headers
 // install helmet and call it. Its better to call the helmet early in your middleware stack to be sure, that the headers are set. (Postman you can see Headers)
 app.use(helmet())
 
-// 2) Development logging
+// 3) Development logging
 if (process.env.NODE_ENV === 'development') { // - We just want to use morgan middleware when we are in development, not in production.
   app.use(morgan('dev'));
 }
 
-// 3) Limit requests from same API
+// 4) Limit requests from same API
 // install express-rate-limit package for limiting requests from an IP using the function rateLimit()
 const limiter = rateLimit({
   max: 100, // count of requests limited
@@ -41,10 +52,10 @@ const limiter = rateLimit({
 app.use("/api", limiter) // we just want to apply our limiter middleware for routes which start with "/api". When we restart our application (save), the limit resets
 
 // app.use(express.urlencoded({ extended: true }))
-// 4) Body parser, reading data from body into req.body
+// 5) Body parser, reading data from body into req.body
 app.use(express.json({limit: "10kb"})); // we can add options to our .json middleware to limit the data which the client can send to our application. We limit to10 kilobyte
 
-// 5) Data sanitization 
+// 6) Data sanitization 
 // a) against NoSQL query injection
 app.use(mongoSanitize()) // it looks in req.body.query and filter out all "$" and "."
 // when we pass as user input a query, we can log in to a users Account without knowing the email address. Program creates a valid token etc... Thats why we need to install "express-mongo-sanitize"
@@ -55,7 +66,7 @@ app.use(mongoSanitize()) // it looks in req.body.query and filter out all "$" an
 // b) against XSS - HTML and js script input
 app.use(xss())
 
-// 6) hpp - Prevent Parameter Pollution // {{URL}}api/v1/tours?sort=duration&sort=price - here we got duplication of sort which will create an Array sort = ["duration", "price"], which we cannot split in our APIFeatures.js
+// 7) hpp - Prevent Parameter Pollution // {{URL}}api/v1/tours?sort=duration&sort=price - here we got duplication of sort which will create an Array sort = ["duration", "price"], which we cannot split in our APIFeatures.js
 // we can pass in an object with property whitelist, which is an array of the fields where we allow multiple queries for "duration" --> {{URL}}api/v1/tours?duration=5&duration=9
 app.use(hpp({ 
   whitelist: [
@@ -68,9 +79,6 @@ app.use(hpp({
   ]
 }))
 
-// 7) Serving static files
-app.use(express.static(`${__dirname}/public`)); // when we type now in our browser 127.0.0.1:3000/overview.html we can see our html file displayed in te browser. We can do that with all our static files
-
 // 8) Test middleware
 // request time for every request added to the request object as a key.
 app.use((req, res, next) => {
@@ -80,6 +88,30 @@ app.use((req, res, next) => {
 });
 
 // ROUTES:
+// Views route - for rendering our frontend (pug file)
+app.get("/", (req, res) => {
+  res.status(200).render("base", {
+    tour: "The Forest Hiker", // the variables which we declare here as properties "tour" and "user" will be available in the pug file as "locals"
+    user: "Jonas"
+  }) // render will render the template, that we pass in as parameter to the client. (base.pug)
+})
+
+// Views route for rendering overview page with all tours
+// overview.pug extends the base --> it includes the base, thats why we can render just overview.pug or tour.pug and still rendering base with it. 
+app.get("/overview", (req, res) => {
+  res.status(200).render("overview", { // we render the overview.pug on route /overview and create local pug variable "title"
+    title: "All Tours"
+  })
+})
+
+// Views route for rendering overview page for a specific tour
+app.get("/tour", (req, res) => {
+  res.status(200).render("tour", { // we render the overview.pug on route /overview and create local pug variable "title"
+    title: "The Forest Hiker Tour"
+  })
+})
+
+// API routes
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use("/api/v1/reviews", reviewRouter);

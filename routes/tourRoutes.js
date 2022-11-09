@@ -25,7 +25,7 @@ router
 
 router
 .route("/monthly-plan/:year")
-.get(restrictTo("admin", "lead-guide", "guide"), getMonthlyPlan)
+.get(protect, restrictTo("admin", "lead-guide", "guide"), getMonthlyPlan)
 
 // route for geospatial calculations. We find tours within a specific distance according to our location. We compare our location with startLocation, which is a field in the Tour Model. In our example, our location is os Angeles. (geospatial data from google maps saved in our route (url)). We can analyze it in Compass Schema
 router
