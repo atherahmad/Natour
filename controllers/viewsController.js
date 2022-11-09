@@ -14,9 +14,14 @@ export const getOverview = catchAsync(async(req, res, next) => {
     })
   })
 
-  
-export const getTour = (req, res) => {
-    res.status(200).render("tour", { // we render the overview.pug on route /overview and create local pug variable "title"
-      title: "The Forest Hiker Tour"
+
+export const getTour = catchAsync(async(req, res) => {
+    const tour = await Tour.findOne({slug: req.params.slug}).populate({
+        path: "reviews",
+        fields: "review rating user"
     })
-  }
+    res.status(200).render("tour", { // we render the overview.pug on route /overview and create local pug variable "title"
+      title: "The Forest Hiker Tour",
+      tour
+    })
+  })
