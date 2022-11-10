@@ -1,5 +1,5 @@
 import express from "express";
-import { getOverview, getTour } from "../controllers/viewsController.js";
+import { getOverview, getTour, getLoginForm } from "../controllers/viewsController.js";
 
 
 const router = express.Router()
@@ -10,6 +10,8 @@ router.get("/", getOverview)
   
   // Views route for rendering overview page for a specific tour // in overview.pug template we have a anchor tag which redirects our route to /tour/${item.slug}. So the getTour controller will apply.
 router.get("/tour/:slug", getTour)
+
+router.get("/login", getLoginForm)
 
 
 
