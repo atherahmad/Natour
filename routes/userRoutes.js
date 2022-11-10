@@ -1,6 +1,6 @@
 import express from "express";
 import { getAllUsers, getUser, createUser, updateUser, deleteUser, updateCurrentUserData, deleteCurrentUser, getMe } from "../controllers/userControllers.js";
-import { signup, login, forgotPassword, resetPassword, protect, updatePassword, restrictTo } from "../controllers/authController.js";
+import { signup, login, forgotPassword, resetPassword, protect, updatePassword, restrictTo, logout } from "../controllers/authController.js";
 
 
 
@@ -15,6 +15,10 @@ router
 router
 .route("/login")
 .post(login)
+// ROUTE FOR LOGGING OUT - updates the cookie and makes it invalid.
+router
+.route("/logout")
+.get(logout)
 // Forgot "Password page" --> creating new token
 router
 .route("/forgotPassword")

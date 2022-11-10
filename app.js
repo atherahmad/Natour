@@ -14,6 +14,7 @@ import helmet from "helmet"
 import mongoSanitize from "express-mongo-sanitize"
 import xss from "xss-clean"
 import hpp from "hpp"
+import cookieParser from "cookie-parser"
 
 
 dotenv.config({ path: './config.env' });
@@ -50,7 +51,11 @@ const limiter = rateLimit({
   windowMs: 60 * 60 * 1000, // this allows 100 requests from the same IP in 60 minutes
   message: "Too many requests from this IP, please try again in an hour!"
 })
+
+// Body parser, reading data from body into req.body
 app.use("/api", limiter) // we just want to apply our limiter middleware for routes which start with "/api". When we restart our application (save), the limit resets
+app.use(cookieParser())
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
 // app.use(express.urlencoded({ extended: true }))
 // 5) Body parser, reading data from body into req.body
@@ -84,7 +89,7 @@ app.use(hpp({
 // request time for every request added to the request object as a key.
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
-  // console.log(req.headers);
+  console.log(req.cookies);
   next();
 });
 

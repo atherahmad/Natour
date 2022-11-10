@@ -64,7 +64,6 @@ export const signup = catchAsync(async (req, res, next) => {
 
 // LOGIN
 export const login = catchAsync(async (req, res, next) => {
-    console.log(req.body);
     const {email, password} = req.body
 
     // 1) Check if email and password exist
@@ -85,14 +84,26 @@ export const login = catchAsync(async (req, res, next) => {
     createSendToken(user, 200, res)
 })
 
+// We create a workaround for deleting the cookie (which is not possible because of httpOnly: true). When users logout, we create a logout route on clicking on lockout button that will send back a new cookie with the exact same name, but without the token. this will overwrite the current cookie in the browser with one thta has the same name, but no token. When that cookie is send along with next request, we cannot identify the user anymore and deny access. Cookie gets very short expiration time. its like deleting.
+export const logout = (req, res) => {
+    res.cookie('jwt', "loggedout", {  // the new created cookie with the same name as the current cookie stored in the browser
+        expires: new Date(Date.now() + 10 * 1000),
+        httpOnly: true
+    }) 
+    res.status(200).json({
+        status: "success"
+    })
+}
+
 // PROTECT ROUTES FOR LOGGED IN USERS:
 export const protect = catchAsync(async(req, res, next) => {
     // 1) Getting the token and check if its exists
     let token;
     if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) { // if header exists and the String starts with "Bearer". Common practice to use authorization: "Bearer token......." for header in postman. You get access to it with "req.headers.authorization"
         token = req.headers.authorization.split(" ")[1] // saves the tokenString into token variable
+    } else if (req.cookies.jwt) {
+        token = req.cookies.jwt
     }
-    // console.log(token);
 
     if (!token) {
         return next(new AppError("You are not logged in! Please login to get access.", 401))
@@ -115,8 +126,39 @@ export const protect = catchAsync(async(req, res, next) => {
 
     // GRANT ACCESS TO PROTECTED ROUTE - next goes to the routeHandler "getAllTours"
     req.user = currentUser
+    res.locals.user = currentUser; // We save the current User data inside our local variables in pug as "user"
     next()
 })
+
+// ONLY FOR RENDERED PAGES, no errors!
+export const isLoggedIn = async(req, res, next) => {
+    
+    if (req.cookies.jwt) { // req.cookies is the property which on default holds the jwt. When you log in it gets created from the backend and saved into a cookie, which is send to the frontend and saved into req.cookies.jwt. You can see that by investigating in google chrome browser the cookie.
+        try {
+            // 1) Verify token - VERIFICATION
+        const decoded = await promisify(jwt.verify)(req.cookies.jwt, process.env.JWT_SECRET)
+
+        // 2) Check if user still exists
+        const currentUser = await User.findById(decoded.id) // it checks if the id, which was send with the token, is still existing in our DB.
+        if (!currentUser) {
+            return next()
+        }
+
+        // 3) Check if user changed password after the token was created
+        if (currentUser.changedPasswordAfter(decoded.iat)) { // if its true, so the password was changed after login in (creation of the token). The Error gets send to the client.
+            return next()
+        }
+
+        // THERE IS A LOGGED IN USER
+        res.locals.user = currentUser // we save the currentUser object on the response object like res.locals.user --> we have access to res.locals.user inside our pug templates.
+        return next()
+        } catch (err) {
+            return next() // when there is no cookie, (no token), the user is not logged in.
+        } 
+    }
+    // THERE IS NO LOGGED IN USER
+    next()
+}
 
 // This function just gives permission for users with role "admin" or "lead-guide" to access the next middleware "deleteTour".
 export const restrictTo = (...roles) => {

@@ -20,10 +20,7 @@ export const getTour = catchAsync(async(req, res, next) => {
         path: "reviews",
         fields: "review rating user"
     })
-    res.status(200).set(
-        'Content-Security-Policy',
-        'connect-src https://*.tiles.mapbox.com https://api.mapbox.com https://events.mapbox.com'
-      )
+    res.status(200)
     .render("tour", { // we render the overview.pug on route /overview and create local pug variable "title"
       title: `${tour.name} Tour`,
       tour
@@ -34,7 +31,7 @@ export const getTour = catchAsync(async(req, res, next) => {
 
   // LOGIN
 export const getLoginForm = (req, res) => {
-    res.status(200).render("login", {
+    res.status(200).render('login', {
         title: "Log into your account"
     })
 }
