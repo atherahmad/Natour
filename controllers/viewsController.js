@@ -39,3 +39,10 @@ export const getLoginForm = (req, res) => {
         title: "Log into your account"
     })
 }
+
+// See your account
+export const getAccount = (req, res) => {
+    res.status(200).render('account', { // we render the pug template "account.pug" with local variable title, user (we saved the currentUser in "protect" middleware on the req.user = currentUser and res.locals.user = currentUser) So we have access in our pug templates to the current Users data.
+      title: "Your account"
+  })
+}

@@ -1,5 +1,5 @@
 import express from "express";
-import { getOverview, getTour, getLoginForm } from "../controllers/viewsController.js";
+import { getOverview, getTour, getLoginForm, getAccount } from "../controllers/viewsController.js";
 import { protect, isLoggedIn } from "../controllers/authController.js";
 
 
@@ -13,6 +13,8 @@ router.get("/",isLoggedIn, getOverview)
 router.get("/tour/:slug",isLoggedIn, getTour)
 
 router.get("/login",isLoggedIn, getLoginForm)
+
+router.get("/me",protect, getAccount)
 
 
 
