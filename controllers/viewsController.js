@@ -1,5 +1,6 @@
 import Tour from "../models/tour.js"
 import { catchAsync } from "../utils/catchAsync.js"
+import AppError from "../utils/appError.js"
 
 
 export const getOverview = catchAsync(async(req, res, next) => {
@@ -20,6 +21,9 @@ export const getTour = catchAsync(async(req, res, next) => {
         path: "reviews",
         fields: "review rating user"
     })
+    if (!tour) {
+      return next(new AppError("There is no tour with that name.", 404)) // we pass in the 2 parameter we declared in "appError.js". The error message we want to create and the statusCode
+    }
     res.status(200)
     .render("tour", { // we render the overview.pug on route /overview and create local pug variable "title"
       title: `${tour.name} Tour`,

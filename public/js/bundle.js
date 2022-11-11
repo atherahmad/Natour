@@ -12023,29 +12023,35 @@ var displayMap = function displayMap(locations) {
   mapboxgl.accessToken = 'pk.eyJ1IjoidGhvbW1pIiwiYSI6ImNsYWF2ZHRtMjAwNWszdm54ZWx0MWw2ZmUifQ.sSHGdj2Ly1AT3nRQyurgxQ';
   var map = new mapboxgl.Map({
     container: 'map',
-    style: 'mapbox://styles/jonasschmedtmann/cjvi9q8jd04mi1cpgmg7ev3dy',
-    scrollZoom: false
+    style: 'mapbox://styles/thommi/clacbc2eu000a16ruj9udrg8v'
+    // style: 'mapbox://styles/thommi/clacb9y7s000s14sdjy3djsu1',
+    // style: 'mapbox://styles/jonasschmedtmann/cjvi9q8jd04mi1cpgmg7ev3dy',
+    // scrollZoom: false
     // center: [-118.113491, 34.111745],
     // zoom: 10,
     // interactive: false
   });
 
-  var bounds = new mapboxgl.LngLatBounds();
+  var bounds = new mapboxgl.LngLatBounds(); // are which will displayed on the map
+
   locations.forEach(function (loc) {
     // Create marker
     var el = document.createElement('div');
-    el.className = 'marker';
+    el.className = 'marker'; // we give the div a class called marker, which is already styled in our css
 
     // Add marker
     new mapboxgl.Marker({
       element: el,
-      anchor: 'bottom'
-    }).setLngLat(loc.coordinates).addTo(map);
+      // thats the div we created
+      anchor: 'bottom' // bottom of the pin is located right on the coordinates point
+    }).setLngLat(loc.coordinates) // coordinates field is in our tour.json inside locations. it holds as value an array of [lat, long] coordinates
+    .addTo(map);
 
-    // Add popup
+    // Add popup - for seeing location names on the map
     new mapboxgl.Popup({
-      offset: 30
-    }).setLngLat(loc.coordinates).setHTML("<p>Day ".concat(loc.day, ": ").concat(loc.description, "</p>")).addTo(map);
+      offset: 30 // we dont want to overlay the paragraph over the div, thats why we are moving the paragraph up with offset:30 property.
+    }).setLngLat(loc.coordinates).setHTML("<p>Day ".concat(loc.day, ": ").concat(loc.description, "</p>")) // we see the day and description which is saved inside our tour documents field locations.day and locations.description
+    .addTo(map);
 
     // Extend map bounds to include current location
     bounds.extend(loc.coordinates);
@@ -12206,8 +12212,10 @@ var logOutBtn = document.querySelector('.nav__el--logout');
 // DELEGATION
 if (mapBox) {
   var locations = JSON.parse(mapBox.dataset.locations);
-  (0, _mapbox.displayMap)(locations);
+  console.log(locations);
+  (0, _mapbox.displayMap)(locations); // we pass in the data from our tour locations. We passed this data in out tour.pug by saving it on mapBox.dataset.locations property.
 }
+
 if (loginForm) {
   loginForm.addEventListener('submit', function (e) {
     // we add eventListener to the "submit" event, to the class "form", which is a form.
@@ -12245,7 +12253,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "40309" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "38613" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];

@@ -11,7 +11,8 @@ const logOutBtn = document.querySelector('.nav__el--logout')
 // DELEGATION
 if (mapBox) {
     const locations = JSON.parse(mapBox.dataset.locations);
-    displayMap(locations);
+    console.log(locations);
+    displayMap(locations); // we pass in the data from our tour locations. We passed this data in out tour.pug by saving it on mapBox.dataset.locations property.
   }
 
 if (loginForm) {

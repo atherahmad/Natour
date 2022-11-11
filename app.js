@@ -37,7 +37,7 @@ app.use(express.static(path.join(__dirname, "public")))
 
 // 2) Set security HTTP headers
 // install helmet and call it. Its better to call the helmet early in your middleware stack to be sure, that the headers are set. (Postman you can see Headers)
-app.use(helmet())
+// app.use(helmet())
 
 // 3) Development logging
 if (process.env.NODE_ENV === 'development') { // - We just want to use morgan middleware when we are in development, not in production.

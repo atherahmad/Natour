@@ -34,35 +34,58 @@ const handleTokenExpiredErrorDB = () => new AppError("Your token has expired! Pl
 
 // DISTINGUISH BETWEEN DEV AND PROD:
 // DEV
-const sendErrorDev = (err, res) => {
-    res.status(err.statusCode).json({
-        status: err.status,
-        error: err,
-        message: err.message,
-        stack: err.stack
-      })
+const sendErrorDev = (err, req, res) => {
+    // A) API
+    if (req.originalUrl.startsWith("/api")) { // originalUrl means the URL without the host (localhost:127.0.0.1:3000) --> so routes will start with /api...If that is true, we respond to the client with an object, which gives back the error in a structured way as json.
+        return res.status(err.statusCode).json({
+            status: err.status,
+            error: err,
+            message: err.message,
+            stack: err.stack
+          })
+    }
+    // B) RENDERED WEBSITE
+    // if the user tries to hit a route which is not starting with "/api" we respond with rendering inside our pug template "error.pug" a local variable called title and msg. 
+    console.error("ERROR", err);
+    return res.status(err.statusCode).render('error', {
+            title: 'Something went wrong!',
+            msg: err.message
+    }) 
 }
 
 // PROD
-const sendErrorProd = (err, res) => {
-    // Operational, trusted error: send message to client (if the user input invalid data, wants to visit a route which does not exist, etc.)
-    if(err.isOperational) {
-        res.status(err.statusCode).json({
-            status: err.status,
-            message: err.message
-          })
-    
-    // Programming or other unknown error: dont leak error details to the client (user)
-    } else {
-        // 1) Log error
-        console.error("ERROR", err);
+const sendErrorProd = (err, req, res) => {
+    // A) API
+    if (req.originalUrl.startsWith("/api")) {
+        // A) Operational, trusted error: send message to client (if the user input invalid data, wants to visit a route which does not exist, etc.)
+        if (err.isOperational) { // if its operational error, we return just a message with the status and errormessage
+            return res.status(err.statusCode).json({
+                status: err.status,
+                message: err.message
+              })
+        }
+        // B) Programming or other unknown error: dont leak error details to the client (user)
         // 2) Send generic message
-        res.status(500).json({
-            status: "error",
+        return res.status(err.statusCode).json({ // if its not operational error we send again generic error message to the client. (we dont let the user see the original error message)
+            title: "error",
             message: "Something went very wrong!"
         })
     }
-    
+    // RENDERED WEBSITE
+    if (err.isOperational) { // if route starts with "/api" and its operational error, we render a new pug template "error.pug" where we save in local variables the title and msg (err.message)
+        return res.status(err.statusCode).render("error", {
+            title: "Something net wrong!",
+            msg: err.message
+        })
+    }
+    // 1) Log error
+    console.error("ERROR", err);
+
+    // 2) Send generic message
+    return res.status(err.statusCode).render('error', { // if route starts with "/api" and its not an operational error we render again error.pug with a different msg.
+        title: 'Something went wrong!',
+        msg: 'Please try again later.'
+    })
 }
 
 
@@ -75,10 +98,11 @@ export const globalErrorHandler = (err, req, res, next) => {
     // here we want to show the error in a different way, when we are in development or production mode. We declared that in our config.env and script in package.json
     if(process.env.NODE_ENV === "development") {
         console.log(err.name);
-        sendErrorDev(err, res)
+        sendErrorDev(err, req, res)
 
     } else if (process.env.NODE_ENV === "production") {
         let {name, code} = err // destructer infos which i need
+        // error.message = err.message
         console.log(err);
         console.log(name);
 
@@ -107,6 +131,6 @@ export const globalErrorHandler = (err, req, res, next) => {
         }
 
         // sending the response to the client
-        sendErrorProd(err, res)
+        sendErrorProd(err, req, res)
     }
   }
