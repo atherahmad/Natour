@@ -74,7 +74,7 @@ const sendErrorProd = (err, req, res) => {
     // RENDERED WEBSITE
     if (err.isOperational) { // if route starts with "/api" and its operational error, we render a new pug template "error.pug" where we save in local variables the title and msg (err.message)
         return res.status(err.statusCode).render("error", {
-            title: "Something net wrong!",
+            title: "Something ent wrong!",
             msg: err.message
         })
     }
@@ -97,14 +97,10 @@ export const globalErrorHandler = (err, req, res, next) => {
 
     // here we want to show the error in a different way, when we are in development or production mode. We declared that in our config.env and script in package.json
     if(process.env.NODE_ENV === "development") {
-        console.log(err.name);
         sendErrorDev(err, req, res)
-
     } else if (process.env.NODE_ENV === "production") {
         let {name, code} = err // destructer infos which i need
         // error.message = err.message
-        console.log(err);
-        console.log(name);
 
         // castError
         if(name === "CastError") {
@@ -125,10 +121,10 @@ export const globalErrorHandler = (err, req, res, next) => {
         if (name === "JsonWebTokenError") {
             err = handleJsonWebTokenErrorDB()
         }
-
-        if (name = "TokenExpiredError") {
-            err = handleTokenExpiredErrorDB()
-        }
+        // this line created a bug in production. When i hit a route hwich is not defined, i got the TokenExpiredError. But cookie was still valid.
+        // if (name = "TokenExpiredError") {
+        //     err = handleTokenExpiredErrorDB()
+        // }
 
         // sending the response to the client
         sendErrorProd(err, req, res)
