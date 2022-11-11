@@ -1,6 +1,6 @@
 import express from "express";
-import { getOverview, getTour, getLoginForm, getAccount } from "../controllers/viewsController.js";
-import { protect, isLoggedIn } from "../controllers/authController.js";
+import { getOverview, getTour, getLoginForm, getAccount, updateUserData} from "../controllers/viewsController.js";
+import { isLoggedIn, protect } from "../controllers/authController.js";
 
 
 const router = express.Router()
@@ -12,10 +12,14 @@ router.get("/",isLoggedIn, getOverview)
   // Views route for rendering overview page for a specific tour // in overview.pug template we have a anchor tag which redirects our route to /tour/${item.slug}. So the getTour controller will apply.
 router.get("/tour/:slug",isLoggedIn, getTour)
 
+// renders the login page
 router.get("/login",isLoggedIn, getLoginForm)
 
+// renders the Current User account page
 router.get("/me",protect, getAccount)
 
+// updates the user data in the backend DB Collection User.
+router.post("/submit-user-data",protect, updateUserData)
 
 
 export default router

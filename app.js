@@ -57,7 +57,6 @@ app.use("/api", limiter) // we just want to apply our limiter middleware for rou
 app.use(cookieParser())
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
-// app.use(express.urlencoded({ extended: true }))
 // 5) Body parser, reading data from body into req.body
 app.use(express.json({limit: "10kb"})); // we can add options to our .json middleware to limit the data which the client can send to our application. We limit to10 kilobyte
 

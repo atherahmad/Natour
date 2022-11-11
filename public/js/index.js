@@ -1,12 +1,14 @@
 import '@babel/polyfill'
 import {login, logout} from "./login.js"
 import { displayMap } from "./mapbox.js";
+import { updateData } from './updateSettings.js';
 
 // this file is mostly for getting the data from the user interface.
 // DOM ELEMENTS
 const mapBox = document.getElementById('map') // Thats the map the created with "mapbox"
 const loginForm = document.querySelector('.form--login') // thats the login form with 2 inputs (email, password)
 const logOutBtn = document.querySelector('.nav__el--logout')
+const userDataForm = document.querySelector(".form-user-data") // thats the form which holds the inputs (data to update from the frontend)
 
 // DELEGATION
 if (mapBox) {
@@ -26,4 +28,11 @@ if (loginForm) {
 }
 
 if (logOutBtn) logOutBtn.addEventListener("click", logout) // we add eventListener on the element which has class ".nav__el--logout" at the "click" event. We logout!
+
+if (userDataForm) userDataForm.addEventListener("submit", e => {
+    e.preventDefault()
+    const name = document.getElementById("name").value // the inputfield have id name
+    const email = document.getElementById("email").value // the inputfield have id email
+    updateData(name, email) // we pass in our updateData function (which will connect and send this updated data to the backend).Backendcontroller will update DB
+})
   
