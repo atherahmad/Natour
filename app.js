@@ -88,7 +88,7 @@ app.use(hpp({
 // request time for every request added to the request object as a key.
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
-  console.log(req.cookies);
+  // console.log(req.cookies);
   next();
 });
 

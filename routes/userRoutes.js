@@ -1,8 +1,6 @@
 import express from "express";
-import { getAllUsers, getUser, createUser, updateUser, deleteUser, updateCurrentUserData, deleteCurrentUser, getMe } from "../controllers/userControllers.js";
+import { getAllUsers, getUser, createUser, updateUser, deleteUser, updateCurrentUserData, deleteCurrentUser, getMe, uploadUserPhoto } from "../controllers/userControllers.js";
 import { signup, login, forgotPassword, resetPassword, protect, updatePassword, restrictTo, logout } from "../controllers/authController.js";
-
-
 
 
 const router = express.Router()
@@ -43,7 +41,7 @@ router
 // update current user data
 router
 .route("/updateMe")
-.patch(updateCurrentUserData)
+.patch(uploadUserPhoto, updateCurrentUserData) 
 // delete current user (set active to false)
 router
 .route("/deleteMe")

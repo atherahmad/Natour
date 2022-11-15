@@ -2,6 +2,42 @@ import User from "../models/user.js";
 import { catchAsync } from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
 import {factoryDeleteOne, factoryGetAll, factoryGetOne, factoryUpdateOne} from "./handlerFactory.js"
+import multer from "multer"
+
+
+// FOR UPLOADING IMAGES - Multer package
+// BUILD OPTION FOR STORAGE - where and how to store it
+const multerStorage = multer.diskStorage({ // we save the file to our file system of multer. We pass in an object with options "destination" and "filename", which has access to req, file and a callback (cb), which functions like the "next()" in express.js
+  destination: (req, file, cb) => { // where to store
+    cb(null, "public/img/users") // first parameter is null (means no error), second path where to save.
+  },
+  filename: (req, file, cb) => { // how to name it
+    // user-userId-21145122.jpeg
+    const ext = file.mimetype.split("/")[1] // file = req.file ==> we want to extract "jpeg" from he file object as string
+    cb(null, `user-${req.user.id}-${Date.now()}.${ext}`) // thats the definition of how we want to store our files.
+  }
+})
+
+// BUILT OPTION FOR FILTER
+// MULTER FILTER
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith("image")) { // we are checking, if value of mimetype property starts with "image". Means if a image gets uploaded ==> no error
+    cb(null, true)
+  } else { // if its no image ==> error!
+    cb(new AppError("Not an image! Please upload only images.", 400), false) // we need t pass in false as second parameter
+  }
+}
+
+// PASS IN MULTER OPTIONS INTO multer() function:
+const upload = multer({ // thats the path to the folder, where we want to save the images, uploaded by the form. We pass in an configuration object. We upload images into our filesystem and put a link into the DB to the images
+  storage: multerStorage,
+  fileFilter: multerFilter
+}) 
+
+// ADD IT AS MIDDLEWARE TO STACK AND CONNECT TO INPUT FIELD WITH NAME "photo"
+export const uploadUserPhoto = upload.single("photo") // "photo" is the name of the input field in the form, where we upload the images. "single" stands for sending a single file to filesystem. The following userController "updateCurrentUserData" can use this data by req.file/req.body
+
+
 
 // we use this function in our updateCurrentUserData function
 const filterObj = (obj, ...allowedFields) => { // ...allowedFields = ["name", "email"] ; obj = req.body
@@ -14,6 +50,7 @@ const filterObj = (obj, ...allowedFields) => { // ...allowedFields = ["name", "e
   return newObj
 }
 
+
 // thats a little middleware to replace the req.params.id with the req.user.id. To get the current User when hes logged in.
 export const getMe = (req, res, next) => {
   req.params.id = req.user.id
@@ -22,13 +59,18 @@ export const getMe = (req, res, next) => {
 
 
 export const updateCurrentUserData = catchAsync(async (req, res, next) => {
+  // console.log(req.file);
+  // console.log(req.body);
   // 1) Create error if user POSTs password data
   if (req.body.password || req.body.confirmPassword) {
     return next(new AppError("This route is not for password updates. Please use /updateMyPassword.", 400))
   }
 
-  // 2) Filtered out unwanted field names of the req.body object that are not allowed to be updated!
+  // 2) Filtered out unwanted field names of the req.body object that are not allowed to be updated! "email" and "name" properties are allowed to be updated by the user itself.
   const filteredBody = filterObj(req.body, "name", "email")
+
+  if (req.file) filteredBody.photo = req.file.filename // we check if the user uploaded an image, which gets saved in req.file. If yes we create a property inside our filteredBody object called photo, where we store the filename of the uploaded image.
+
   console.log(filteredBody);
 
   // 3) Update user document
@@ -43,7 +85,7 @@ export const updateCurrentUserData = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: "success",
     data: {
-      user: updatedUser
+      user: updatedUser // we update the currentUser name, email or photo properties.
     }
   })
 })

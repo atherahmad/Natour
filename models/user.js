@@ -17,7 +17,10 @@ const userSchema = mongoose.Schema({
         trim: true,
         lowercase: true
       },
-    photo: String,
+    photo: {
+      type: String,
+      default: "default.jpg" // name of default image stored in dev-data/data/img/users/default.jpg
+    },
     role: {
       type: String,
       enum: ["user", "guide", "lead-guide", "admin"],
