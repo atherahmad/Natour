@@ -3,20 +3,24 @@ import { catchAsync } from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
 import {factoryDeleteOne, factoryGetAll, factoryGetOne, factoryUpdateOne} from "./handlerFactory.js"
 import multer from "multer"
+import sharp from "sharp"
 
 
 // FOR UPLOADING IMAGES - Multer package
 // BUILD OPTION FOR STORAGE - where and how to store it
-const multerStorage = multer.diskStorage({ // we save the file to our file system of multer. We pass in an object with options "destination" and "filename", which has access to req, file and a callback (cb), which functions like the "next()" in express.js
-  destination: (req, file, cb) => { // where to store
-    cb(null, "public/img/users") // first parameter is null (means no error), second path where to save.
-  },
-  filename: (req, file, cb) => { // how to name it
-    // user-userId-21145122.jpeg
-    const ext = file.mimetype.split("/")[1] // file = req.file ==> we want to extract "jpeg" from he file object as string
-    cb(null, `user-${req.user.id}-${Date.now()}.${ext}`) // thats the definition of how we want to store our files.
-  }
-})
+// const multerStorage = multer.diskStorage({ // we save the file to our file system of multer. We pass in an object with options "destination" and "filename", which has access to req, file and a callback (cb), which functions like the "next()" in express.js
+//   destination: (req, file, cb) => { // where to store
+//     cb(null, "public/img/users") // first parameter is null (means no error), second path where to save.
+//   },
+//   filename: (req, file, cb) => { // how to name it
+//     // user-userId-21145122.jpeg
+//     const ext = file.mimetype.split("/")[1] // file = req.file ==> we want to extract "jpeg" from he file object as string
+//     cb(null, `user-${req.user.id}-${Date.now()}.${ext}`) // thats the definition of how we want to store our files.
+//   }
+// })
+
+// We simply store the file in our memory as a buffer. Which is available on req.file.buffer. The filename property wont get set here, thats why we need to set it below in resizeUserPhoto()
+const multerStorage = multer.memoryStorage()
 
 // BUILT OPTION FOR FILTER
 // MULTER FILTER
@@ -37,13 +41,22 @@ const upload = multer({ // thats the path to the folder, where we want to save t
 // ADD IT AS MIDDLEWARE TO STACK AND CONNECT TO INPUT FIELD WITH NAME "photo"
 export const uploadUserPhoto = upload.single("photo") // "photo" is the name of the input field in the form, where we upload the images. "single" stands for sending a single file to filesystem. The following userController "updateCurrentUserData" can use this data by req.file/req.body
 
+// RESIZE UPLOADED FILE with sharp package
+export const resizeUserPhoto = (req, res, next) => {
 
+  if (!req.file) return next()
+
+  req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`
+
+  sharp(req.file.buffer).resize(500, 500).toFormat("jpeg").jpeg({quality: 90}).toFile(`public/img/users/${req.file.filename}`) // sharp is a image processing library (package) for resizing images in a simple way. We pass into sharp() the name of the file we want to resize. It gives back an object, where we can use JS methods on for resizing. "resize(500, 500)" is resizing the image to a square, all the image files will have the format "jpeg". jpeg method compresses the image quality to 90% that it wont take too much space. toFile() needs the path to the file and want to save this to the file in our fileSystem.
+  next()
+}
 
 // we use this function in our updateCurrentUserData function
 const filterObj = (obj, ...allowedFields) => { // ...allowedFields = ["name", "email"] ; obj = req.body
   const newObj = {}
-  Object.keys(obj).forEach(item => { // Object.keys(obj) = [array of fieldnames of the passed "obj"] -_> which is req.body. We loop through the fields of req.body and check, if its one of the "allowedFields"
-    if (allowedFields.includes(item)) { // we store the fitting "allowedFields" of the array of fieldnames inside our empty Object "newObj" and return it
+  Object.keys(obj).forEach(item => { // Object.keys(obj) = [array of field names of the passed "obj"] -_> which is req.body. We loop through the fields of req.body and check, if its one of the "allowedFields"
+    if (allowedFields.includes(item)) { // we store the fitting "allowedFields" of the array of field names inside our empty Object "newObj" and return it
       newObj[item] = obj[item]
     }
   })
