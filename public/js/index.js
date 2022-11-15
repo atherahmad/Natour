@@ -32,15 +32,18 @@ if (logOutBtn) logOutBtn.addEventListener("click", logout) // we add eventListen
 
 if (userDataForm) userDataForm.addEventListener("submit", e => {
     e.preventDefault()
-    document.querySelector(".btn--save-password").textContent = "Updating..."
-    const name = document.getElementById("name").value // the inputfield have id name
-    const email = document.getElementById("email").value // the inputfield have id email
-    updateSettings({name, email}, "data") // we pass in our updateData function (which will connect and send this updated data to the backend).Backendcontroller will update DB
+    const form = new FormData() // creates an object with properties we can set by appending them. Representing an input field and their values (name,email) in a form.
+    form.append("name", document.getElementById("name").value) // the input field have id name
+    form.append("email", document.getElementById("email").value) // the input field have id email
+    form.append("photo", document.getElementById("photo").files[0]) // because in frontend input field its type is file. Thats why its getting stored in files[0]
+    console.log(form);
+    updateSettings(form, "data") // we pass in our updateData function (which will connect and send this updated data to the backend).Backendcontroller will update DB
 })
 
 // CHANGE PASSWORD CURRENT USER
 if (userPasswordForm) userPasswordForm.addEventListener("submit", async e => {
     e.preventDefault()
+    document.querySelector(".btn--save-password").textContent = "Updating..."
     const passwordCurrent = document.getElementById("password-current").value // the inputfield have id "password-current"
     const password = document.getElementById("password").value
     const confirmPassword = document.getElementById("password-confirm").value

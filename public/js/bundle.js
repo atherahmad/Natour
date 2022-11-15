@@ -12292,13 +12292,12 @@ if (logOutBtn) logOutBtn.addEventListener("click", _login.logout); // we add eve
 
 if (userDataForm) userDataForm.addEventListener("submit", function (e) {
   e.preventDefault();
-  document.querySelector(".btn--save-password").textContent = "Updating...";
-  var name = document.getElementById("name").value; // the inputfield have id name
-  var email = document.getElementById("email").value; // the inputfield have id email
-  (0, _updateSettings.updateSettings)({
-    name: name,
-    email: email
-  }, "data"); // we pass in our updateData function (which will connect and send this updated data to the backend).Backendcontroller will update DB
+  var form = new FormData(); // creates an object with properties we can set by appending them. Representing an input field and their values (name,email) in a form.
+  form.append("name", document.getElementById("name").value); // the input field have id name
+  form.append("email", document.getElementById("email").value); // the input field have id email
+  form.append("photo", document.getElementById("photo").files[0]); // because in frontend input field its type is file. Thats why its getting stored in files[0]
+  console.log(form);
+  (0, _updateSettings.updateSettings)(form, "data"); // we pass in our updateData function (which will connect and send this updated data to the backend).Backendcontroller will update DB
 });
 
 // CHANGE PASSWORD CURRENT USER
@@ -12310,22 +12309,23 @@ if (userPasswordForm) userPasswordForm.addEventListener("submit", /*#__PURE__*/f
         switch (_context.prev = _context.next) {
           case 0:
             e.preventDefault();
+            document.querySelector(".btn--save-password").textContent = "Updating...";
             passwordCurrent = document.getElementById("password-current").value; // the inputfield have id "password-current"
             password = document.getElementById("password").value;
             confirmPassword = document.getElementById("password-confirm").value;
-            _context.next = 6;
+            _context.next = 7;
             return (0, _updateSettings.updateSettings)({
               passwordCurrent: passwordCurrent,
               password: password,
               confirmPassword: confirmPassword
             }, "password");
-          case 6:
+          case 7:
             // we pass in our updateData function (which will connect and send this updated data to the backend).Backendcontroller will update DB
             document.querySelector(".btn--save-password").textContent = "Save password";
             document.getElementById("password-current").value = "";
             document.getElementById("password").value = "";
             document.getElementById("password-confirm").value = "";
-          case 10:
+          case 11:
           case "end":
             return _context.stop();
         }
@@ -12361,7 +12361,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "32995" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "37873" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];
