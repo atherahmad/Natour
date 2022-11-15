@@ -1,7 +1,7 @@
 import '@babel/polyfill'
 import {login, logout} from "./login.js"
 import { displayMap } from "./mapbox.js";
-import { updateData } from './updateSettings.js';
+import { updateSettings } from './updateSettings.js';
 
 // this file is mostly for getting the data from the user interface.
 // DOM ELEMENTS
@@ -9,6 +9,7 @@ const mapBox = document.getElementById('map') // Thats the map the created with 
 const loginForm = document.querySelector('.form--login') // thats the login form with 2 inputs (email, password)
 const logOutBtn = document.querySelector('.nav__el--logout')
 const userDataForm = document.querySelector(".form-user-data") // thats the form which holds the inputs (data to update from the frontend)
+const userPasswordForm = document.querySelector(".form-user-password")
 
 // DELEGATION
 if (mapBox) {
@@ -31,8 +32,21 @@ if (logOutBtn) logOutBtn.addEventListener("click", logout) // we add eventListen
 
 if (userDataForm) userDataForm.addEventListener("submit", e => {
     e.preventDefault()
+    document.querySelector(".btn--save-password").textContent = "Updating..."
     const name = document.getElementById("name").value // the inputfield have id name
     const email = document.getElementById("email").value // the inputfield have id email
-    updateData(name, email) // we pass in our updateData function (which will connect and send this updated data to the backend).Backendcontroller will update DB
+    updateSettings({name, email}, "data") // we pass in our updateData function (which will connect and send this updated data to the backend).Backendcontroller will update DB
 })
-  
+
+// CHANGE PASSWORD CURRENT USER
+if (userPasswordForm) userPasswordForm.addEventListener("submit", async e => {
+    e.preventDefault()
+    const passwordCurrent = document.getElementById("password-current").value // the inputfield have id "password-current"
+    const password = document.getElementById("password").value
+    const confirmPassword = document.getElementById("password-confirm").value
+    await updateSettings({passwordCurrent, password, confirmPassword}, "password") // we pass in our updateData function (which will connect and send this updated data to the backend).Backendcontroller will update DB
+    document.querySelector(".btn--save-password").textContent = "Save password"
+    document.getElementById("password-current").value = ""
+    document.getElementById("password").value = ""
+    document.getElementById("password-confirm").value = ""
+})
