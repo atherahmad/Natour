@@ -1,6 +1,9 @@
 import nodemailer from "nodemailer"
 import pug from "pug"
 import htmlToText from "html-to-text"
+import path from "path"
+
+const __dirname = path.resolve()
 
 
 // new Email(user, url).sendWelcome()
@@ -33,7 +36,7 @@ export class Email {
     // SEND the actual EMAIL
     async send(template, subject) {
         // 1) Render HTML based on a pug template
-        const html = pug.renderFile(`${__dirname}/../../views/email/${template}.pug`, { // here we are creating the connection to our pug file and define locals for pug (firstName, url, subject). Here we create the html.
+        const html = pug.renderFile(`${__dirname}/views/email/${template}.pug`, { // here we are creating the connection to our pug file and define locals for pug (firstName, url, subject). Here we create the html.
             firstName: this.firstName,
             url: this.url,
             subject
@@ -60,12 +63,9 @@ export class Email {
 // install package nodemailer
 // we need a transporter, the options, and send function
 // log in to "mailtrap.io" for testing sending emails. When we hit the route ".../forgotPassword" we can se the email which we send on "mailtrap.io"
-const sendEmail = async options => {
+// const sendEmail = async options => {
 
 
-    // 3) Actually send the email
-    await transporter.sendMail(mailOptions) // sendMail is a build in method of the package nodemailer. As parameter it takes the mailOptions (info for the email you want to send)
-}
-
-
-export default sendEmail
+//     // 3) Actually send the email
+//     await transporter.sendMail(mailOptions) // sendMail is a build in method of the package nodemailer. As parameter it takes the mailOptions (info for the email you want to send)
+// }

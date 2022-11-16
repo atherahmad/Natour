@@ -2,7 +2,7 @@ import User from "../models/user.js";
 import { catchAsync } from "../utils/catchAsync.js";
 import jwt from "jsonwebtoken"
 import AppError from "../utils/appError.js";
-import sendEmail from "../utils/email.js";
+import {Email} from "../utils/email.js";
 import {promisify} from "util"; // util is a build in Object of Node.js. We destructure the method promisify from it to use it in our Verification below
 import crypto from "crypto"
 
@@ -47,14 +47,12 @@ const createSendToken = (user, statusCode, res) => {
 export const signup = catchAsync(async (req, res, next) => {
     // const newUser = await User.create(req.body)
     // due to security reasons we need to replace above code with following code: We only allow the data we actually need to be saved in the new user in our DB. Even when a user tries to manually add a "role: admin". It wont be stored in the user
-    const newUser = await User.create({
-        name: req.body.name,
-        email: req.body.email,
-        password: req.body.password,
-        passwordChangedAt: req.body.passwordChangedAt,
-        confirmPassword: req.body.confirmPassword,
-        role: req.body.role
-    })
+    const newUser = await User.create(req.body)
+    const url = `${req.protocol}://${req.get("host")}/me`
+
+    console.log(url);
+
+    await new Email(newUser, url).sendWelcome() //  pass in our Email class, which builds objects with email data, according to the newUsers data and the url we pass in.
 
     // JWT - Login Users with secure JWT
     // for authentication we install the package "jsonwebtoken"
@@ -191,11 +189,11 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
     const message = `Forgot your password? Submit a PATCH request with your new password and confirmPassword to: ${resetURL}.\nIf you didnt forget your password, please ignore this email!` // "\n" means new line.
 
     try {
-        await sendEmail({ // sendEmail is a async function which returns a promise, thats why we need to await it.
-            email: user.email,
-            subject: "Your password reset token (valid for 10 min)", // We send email to "user.email" with Betreff "Your password reset token(valid for 10 min)" and message "Forgot your password? Submit a PATCH.... etc"
-            message
-        })
+        // await sendEmail({ // sendEmail is a async function which returns a promise, thats why we need to await it.
+        //     email: user.email,
+        //     subject: "Your password reset token (valid for 10 min)", // We send email to "user.email" with Betreff "Your password reset token(valid for 10 min)" and message "Forgot your password? Submit a PATCH.... etc"
+        //     message
+        // })
     
         res.status(200).json({
             status: "success",
