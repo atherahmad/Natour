@@ -42,15 +42,15 @@ const upload = multer({ // thats the path to the folder, where we want to save t
 export const uploadUserPhoto = upload.single("photo") // "photo" is the name of the input field in the form, where we upload the images. "single" stands for sending a single file to filesystem. The following userController "updateCurrentUserData" can use this data by req.file/req.body
 
 // RESIZE UPLOADED FILE with sharp package
-export const resizeUserPhoto = (req, res, next) => {
+export const resizeUserPhoto = catchAsync(async(req, res, next) => {
 
   if (!req.file) return next()
 
   req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`
 
-  sharp(req.file.buffer).resize(500, 500).toFormat("jpeg").jpeg({quality: 90}).toFile(`public/img/users/${req.file.filename}`) // sharp is a image processing library (package) for resizing images in a simple way. We pass into sharp() the name of the file we want to resize. It gives back an object, where we can use JS methods on for resizing. "resize(500, 500)" is resizing the image to a square, all the image files will have the format "jpeg". jpeg method compresses the image quality to 90% that it wont take too much space. toFile() needs the path to the file and want to save this to the file in our fileSystem.
+  await sharp(req.file.buffer).resize(500, 500).toFormat("jpeg").jpeg({quality: 90}).toFile(`public/img/users/${req.file.filename}`) // sharp is a image processing library (package) for resizing images in a simple way. We pass into sharp() the name of the file we want to resize. It gives back an object, where we can use JS methods on for resizing. "resize(500, 500)" is resizing the image to a square, all the image files will have the format "jpeg". jpeg method compresses the image quality to 90% that it wont take too much space. toFile() needs the path to the file and want to save this to the file in our fileSystem.
   next()
-}
+})
 
 // we use this function in our updateCurrentUserData function
 const filterObj = (obj, ...allowedFields) => { // ...allowedFields = ["name", "email"] ; obj = req.body

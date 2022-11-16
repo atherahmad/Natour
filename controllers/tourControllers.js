@@ -3,6 +3,53 @@ import Tour from '../models/tour.js';
 import AppError from '../utils/appError.js';
 import { catchAsync } from '../utils/catchAsync.js';
 import { factoryCreateOne, factoryDeleteOne, factoryGetAll, factoryGetOne, factoryUpdateOne } from "./handlerFactory.js"
+import multer from "multer"
+import sharp from "sharp"
+
+
+const multerStorage = multer.memoryStorage()
+
+// BUILT OPTION FOR FILTER
+// MULTER FILTER
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith("image")) { // we are checking, if value of mimetype property starts with "image". Means if a image gets uploaded ==> no error
+    cb(null, true)
+  } else { // if its no image ==> error!
+    cb(new AppError("Not an image! Please upload only images.", 400), false) // we need t pass in false as second parameter
+  }
+}
+
+// PASS IN MULTER OPTIONS INTO multer() function:
+const upload = multer({ // thats the path to the folder, where we want to save the images, uploaded by the form. We pass in an configuration object. We upload images into our filesystem and put a link into the DB to the images
+  storage: multerStorage,
+  fileFilter: multerFilter
+}) 
+
+export const uploadTourImages = upload.fields([ // we want to upload multiple files to multiple fields. we use "fields()"
+  {name: "imageCover", maxCount: 1},
+  {name: "images", maxCount: 3}
+])
+// upload.single("image") // if we want to upload a single file ==> req.file
+// upload.array("images", 5)  // if we would just want to upload multiple files to one field, we would do it like that. first parameter is name of the field and secod the maxCount (amount) of files we want to upload ==> req.files
+
+export const resizeTourImages = catchAsync(async(req, res, next) => { // here we process the image files and save them to the disc (filesystem)
+  // console.log(req.files);
+  if (!req.files.imageCover || !req.files.images) return next()
+  
+  // 1) Cover image
+  req.body.imageCover = `tour-${req.params.id}-${Date.now()}-cover.jpeg`
+  await sharp(req.files.imageCover[0].buffer).resize(2000, 1333).toFormat("jpeg").jpeg({quality: 90}).toFile(`public/img/tours/${req.body.imageCover}`) // sharp is a image processing library (package) for resizing images in a simple way. We pass into sharp() the name of the file we want to resize. It gives back an object, where we can use JS methods on for resizing. "resize(500, 500)" (width, height) is resizing the image to a square, all the image files will have the format "jpeg". jpeg method compresses the image quality to 90% that it wont take too much space. toFile() needs the path to the file and want to save this to the file in our fileSystem.
+
+  // 2) Images
+  req.body.images = [] // creating an empty array on req.body.images
+  await Promise.all(req.files.images.map(async(item, i) => { // Promise.all() awaits all of the file processing which are promises.
+    const filename = `tour-${req.params.id}-${Date.now()}-${i + 1}.jpeg`
+    await sharp(item.buffer).resize(2000, 1333).toFormat("jpeg").jpeg({quality: 90}).toFile(`public/img/tours/${filename}`)
+    req.body.images.push(filename) // we push all the files which are stored on req.files.images inside our empty array in req.body.images
+    })
+  )
+  next()
+})
 
 
 // ALIASING : we can manipulate the req.query object before we will use it in getAllTours
