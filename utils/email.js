@@ -55,8 +55,12 @@ export class Email {
         await this.newTransport().sendMail(mailOptions)
     }
 
-    async sendWelcome() {
-        await this.send("welcome", "Welcome to the Natours Family!") // this.send("pugTemplate for email", "subject for email")
+    async sendWelcome() { // this is used in authController function "signUp"
+        await this.send("welcome", "Welcome to the Natours Family!") // this.send("pugTemplate for email sign up", "subject for email")
+    }
+
+    async sendPasswordReset() { // this will be used in out authController function "forgotPassword"
+        await this.send("passwordReset", "Your password reset token (valid for only 10 minutes") // this.send("pugTemplate for email resetPassword", "subject for email")
     }
 }
 

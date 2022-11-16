@@ -184,16 +184,9 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
     await user.save({validateBeforeSave: false}) // this deactivate all the validators which we specified in our user schema. We add this property to our current user. And we save the encrypted string to our DB
 
     // 3) Send it to users email
-    const resetURL = `${req.protocol}://${req.get("host")}/api/v1/users/resetPassword/${resetToken}` // we are sending the plain resetToken and not the encrypted one!
-
-    const message = `Forgot your password? Submit a PATCH request with your new password and confirmPassword to: ${resetURL}.\nIf you didnt forget your password, please ignore this email!` // "\n" means new line.
-
     try {
-        // await sendEmail({ // sendEmail is a async function which returns a promise, thats why we need to await it.
-        //     email: user.email,
-        //     subject: "Your password reset token (valid for 10 min)", // We send email to "user.email" with Betreff "Your password reset token(valid for 10 min)" and message "Forgot your password? Submit a PATCH.... etc"
-        //     message
-        // })
+        const resetURL = `${req.protocol}://${req.get("host")}/api/v1/users/resetPassword/${resetToken}` // we are sending the plain resetToken and not the encrypted one!
+        await new Email(user, resetURL).sendPasswordReset() // this is creating the email and sending it to the user.
     
         res.status(200).json({
             status: "success",
