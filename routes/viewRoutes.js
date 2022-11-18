@@ -1,5 +1,5 @@
 import express from "express";
-import { getOverview, getTour, getLoginForm, getAccount, updateUserData} from "../controllers/viewsController.js";
+import { getOverview, getTour, getLoginForm, getAccount, updateUserData, getMyTours} from "../controllers/viewsController.js";
 import { isLoggedIn, protect } from "../controllers/authController.js";
 import { createBookingCheckout } from "../controllers/bookingController.js";
 
@@ -18,6 +18,9 @@ router.get("/login",isLoggedIn, getLoginForm)
 
 // renders the Current User account page
 router.get("/me",protect, getAccount)
+
+// renders the Current Users booked tours page
+router.get("/my-tours",protect, getMyTours)
 
 // updates the user data in the backend DB Collection User.
 router.post("/submit-user-data",protect, updateUserData)

@@ -66,3 +66,9 @@ export const createBookingCheckout = catchAsync(async(req, res, next) => {
     // Respond to client is here the redirection to the landing page. Thats how we hide the success_url, which holds the query with where the userid,tourid and tour price is stored
     res.redirect(req.originalUrl.split("?")[0]) // redirect is creating a new request to he url we pass in. req.originalUrl.split("?")[0] = `${req.protocol}://${req.get("host")}/ . Means to our root page (route) "/"
 })
+
+export const createBooking = factoryCreateOne(Booking)
+export const getBooking = factoryGetOne(Booking)
+export const getAllBookings = factoryGetAll(Booking)
+export const updateBooking = factoryUpdateOne(Booking)
+export const deleteBooking = factoryDeleteOne(Booking)

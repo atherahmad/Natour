@@ -35,6 +35,7 @@ bookingSchema.pre(/^find/, function(next) { // for every query which starts with
         path: "tour",
         select: "name"
     })
+    next()
 })
 
 // creating a Model out of it: Model variables always wih capital Letter.

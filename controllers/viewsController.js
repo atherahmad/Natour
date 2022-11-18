@@ -2,6 +2,7 @@ import Tour from "../models/tour.js"
 import User from "../models/user.js"
 import { catchAsync } from "../utils/catchAsync.js"
 import AppError from "../utils/appError.js"
+import Booking from "../models/booking.js"
 
 
 export const getOverview = catchAsync(async(req, res, next) => {
@@ -46,6 +47,21 @@ export const getAccount = (req, res) => {
       title: "Your account"
   })
 }
+
+// See current users booked tours
+export const getMyTours = catchAsync(async(req, res) => {
+  // 1) find all bookings
+  const bookings = await Booking.find({user: req.user.id}) // this finds alls the bookings of a user by his ID
+  // 2) find tours with the returned IDs
+  const tourIDs = bookings.map(item => item.tour.id) // this will store all the tourIds which the user purchased inside an array. (the tour ids are stored in every booking document inside the tour field)
+  const tours = await Tour.find({_id: {$in: tourIDs}}) // will select all the tours documents which have an ID in our DB which is also inside tourIDs array.
+
+  res.status(200).render("overview", {  // rendering our pug template overview.pug to the client. But just with the tours, which the user booked in the past.
+    title: "My Tours",
+    tours
+  })
+})
+
 
 export const updateUserData = catchAsync(async(req, res, next) => {
   console.log("UPDATING USER",req.body);
