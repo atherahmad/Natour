@@ -82,7 +82,7 @@ export const login = catchAsync(async (req, res, next) => {
     createSendToken(user, 200, res)
 })
 
-// We create a workaround for deleting the cookie (which is not possible because of httpOnly: true). When users logout, we create a logout route on clicking on lockout button that will send back a new cookie with the exact same name, but without the token. this will overwrite the current cookie in the browser with one thta has the same name, but no token. When that cookie is send along with next request, we cannot identify the user anymore and deny access. Cookie gets very short expiration time. its like deleting.
+// We create a workaround for deleting the cookie (which is not possible because of httpOnly: true). When users logout, we create a logout route on clicking on lockout button that will send back a new cookie with the exact same name, but without the token. this will overwrite the current cookie in the browser with one that has the same name, but no token. When that cookie is send along with next request, we cannot identify the user anymore and deny access. Cookie gets very short expiration time. its like deleting.
 export const logout = (req, res) => {
     res.cookie('jwt', "loggedout", {  // the new created cookie with the same name as the current cookie stored in the browser
         expires: new Date(Date.now() + 10 * 1000),

@@ -16,8 +16,8 @@ export const login = async(email, password) => {
         if (result.data.status === "success") {
             showAlert("success", 'Logged in successfully!')
             window.setTimeout(() => {
-                location.assign("/") // after 3 seconds we redirect the route to the root "/" - where we see overview of all the tours
-            }, 3000)
+                location.assign("/") // after 1.5 seconds we redirect the route to the root "/" - where we see overview of all the tours
+            }, 1500)
         }
     } catch(err) {
         showAlert("error", err.response.data.message)

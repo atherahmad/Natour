@@ -66,8 +66,8 @@ const sendErrorProd = (err, req, res) => {
         }
         // B) Programming or other unknown error: dont leak error details to the client (user)
         // 2) Send generic message
-        return res.status(err.statusCode).json({ // if its not operational error we send again generic error message to the client. (we dont let the user see the original error message)
-            title: "error",
+        return res.status(500).json({ // if its not operational error we send again generic error message to the client. (we dont let the user see the original error message)
+            status: "error",
             message: "Something went very wrong!"
         })
     }

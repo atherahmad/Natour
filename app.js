@@ -15,6 +15,7 @@ import mongoSanitize from "express-mongo-sanitize"
 import xss from "xss-clean"
 import hpp from "hpp"
 import cookieParser from "cookie-parser"
+import bookingRouter from "./routes/bookingRoutes.js"
 
 
 dotenv.config({ path: './config.env' });
@@ -99,6 +100,8 @@ app.use('/', viewRouter) // for rendering pug templates to the client
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use("/api/v1/reviews", reviewRouter);
+app.use("/api/v1/booking", bookingRouter);
+
 
 
 // ERROR HANDLING:

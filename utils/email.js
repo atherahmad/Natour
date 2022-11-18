@@ -13,14 +13,20 @@ export class Email {
         this.to = user.email
         this.firstName = user.name.split(" ")[0]
         this.url = url
-        this.from = `Jonas Schmedtmann <${process.env.EMAIL_FROM}>`
+        this.from = `Thomas Baeskow <${process.env.EMAIL_FROM}>`
     }
 
     // we CREATE different TRANSPORTS for development and production
     newTransport() {
         if (process.env.NODE_ENV === "production") {
             // Sendgrid
-            return 1
+            return nodemailer.createTransport({
+                service: "SendGrid", // "SendGrid" is predefined and recognized
+                auth: { // authentication for sendGrid
+                    user: process.env.SENDGRID_USERNAME, // saved in config.env (username and password)
+                    pass: process.env.SENDGRID_PASSWORD
+                }
+            })
         }
 
         // it will return a nodemailer transport like below (email template) when we are
