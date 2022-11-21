@@ -130,7 +130,7 @@ export const protect = catchAsync(async(req, res, next) => {
 
 // ONLY FOR RENDERED PAGES, no errors!
 export const isLoggedIn = async(req, res, next) => {
-    
+    console.log(req.cookies.jwt);
     if (req.cookies.jwt) { // req.cookies is the property which on default holds the jwt. When you log in it gets created from the backend and saved into a cookie, which is send to the frontend and saved into req.cookies.jwt. You can see that by investigating in google chrome browser the cookie.
         try {
             // 1) Verify token - VERIFICATION
@@ -138,6 +138,7 @@ export const isLoggedIn = async(req, res, next) => {
 
         // 2) Check if user still exists
         const currentUser = await User.findById(decoded.id) // it checks if the id, which was send with the token, is still existing in our DB.
+        console.log(currentUser);
         if (!currentUser) {
             return next()
         }
