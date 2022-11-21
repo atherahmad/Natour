@@ -1,8 +1,11 @@
 /* eslint-disable import/extensions */
 import mongoose from "mongoose"
 import app from './app.js';
+import dotenv from "dotenv"
 
 const port = process.env.PORT || 3000;
+
+dotenv.config({ path: './config.env' });
 
 // placing "<PASSWORD>" in the connection string in config.env with our user Password. Which is saved in environmental variables.
 const DB = process.env.DATABASE.replace("<PASSWORD>", process.env.DATABASE_PASSWORD)
@@ -14,7 +17,8 @@ mongoose.connect(DB, {
   useCreateIndex: true,
   useFindAndModify: false,
   useUnifiedTopology: true
-})
+}
+)
 .then(() => 
  app.listen(port, console.log(`DB connected and listening on ${port}`)))
 .catch((err) => {
