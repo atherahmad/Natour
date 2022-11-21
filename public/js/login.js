@@ -9,7 +9,7 @@ export const login = async(email, password) => {
     try {
         const result = await axios({ // we are sending the data which contains the email and password which the user provided to the client, to our Backend.
             method: "POST",
-            url: `${process.env.RENDER_URL}/api/v1/users/login`, // HTTP REQUEST IS ONE WAY OF SENDING DATA TO THE BACKEND  // needs to be the same path like in the routes! http://127.0.0.1:3000/api/v1/users
+            url: `https://natours-lbx3.onrender.com/api/v1/users/login`, // HTTP REQUEST IS ONE WAY OF SENDING DATA TO THE BACKEND  // needs to be the same path like in the routes! http://127.0.0.1:3000/api/v1/users
             data: {
                 email,
                 password
