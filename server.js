@@ -8,7 +8,7 @@ const port = process.env.PORT || 3000;
 dotenv.config({ path: './config.env' });
 
 // placing "<PASSWORD>" in the connection string in config.env with our user Password. Which is saved in environmental variables.
-const DB = process.env.DATABASE.replace("<PASSWORD>", process.env.DATABASE_PASSWORD)
+const DB = process.env.DATABASE
 
 
 // connection to hosted ATLAS database
