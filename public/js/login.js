@@ -3,7 +3,7 @@ import { showAlert } from "./alerts.js"
 import dotenv from "dotenv"
 
 
-dotenv.config({ path: './config.env' });
+dotenv.config({ path: '../../config.env' });
 
 export const login = async(email, password) => {
     try {
