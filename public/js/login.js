@@ -1,9 +1,6 @@
 import axios from "axios"
 import { showAlert } from "./alerts.js"
-import dotenv from "dotenv"
 
-
-dotenv.config({ path: '../../config.env' });
 
 export const login = async(email, password) => {
     try {
@@ -31,7 +28,7 @@ export const logout = async () => {
     try {
         const result = await axios({
             method: "GET",
-            url: `${process.env.RENDER_URL}/api/v1/users/logout`,  // needs to be the same path like in the routes! // HTTP REQUEST IS ONE WAY OF SENDING DATA TO THE BACKEND
+            url: `https://natours-lbx3.onrender.com/api/v1/users/logout`,  // needs to be the same path like in the routes! // HTTP REQUEST IS ONE WAY OF SENDING DATA TO THE BACKEND
             
         })
         if ((result.data.status === "success")) location.reload(true) // THIS WILL FORCE A RELOAD FROM THE SERVER SIDE. means the updated cookie is stored on the req.cookies.jwt field. we are logged out!
