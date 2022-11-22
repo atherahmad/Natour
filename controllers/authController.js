@@ -22,7 +22,8 @@ const createSendToken = (user, statusCode, res) => {
     const cookieOptions = {
         expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000), // converting to milliseconds
         secure: true, // cookie will only send on encrypted connection (https)
-        httpOnly: true // cookie can not be accessed or modified in any way by the browser (Cross-Site scripting attacks)
+        httpOnly: true, // cookie can not be accessed or modified in any way by the browser (Cross-Site scripting attacks)
+        sameSite:"Lax"
     }
 
     if (process.env.NODE_ENV === "production") cookieOptions.secure = true // we just want to set this option in production mode to be able to send the cookie in dev mode.
